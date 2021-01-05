@@ -3,7 +3,22 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 
-createApp(App)
+import authConfig from '../auth_config.json'
+import { setupAuth } from "./auth";
+
+let app = createApp(App)
   .use(store)
-  .use(router)
-  .mount("#app");
+  .use(router);
+
+function callbackRedirect(appState) {
+  console.log(appState);
+  router.push(
+    appState && appState.targetUrl
+      ? appState.targetUrl
+      : '/'
+  );
+}
+
+setupAuth(authConfig, callbackRedirect).then(auth => {
+  app.use(auth).mount('#app');
+})
