@@ -1,33 +1,39 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
-import About from "../views/About.vue";
+import Portfolio from "../views/Portfolio.vue";
+import Account from "../views/Account.vue";
 import Callback from "../views/Callback.vue";
 
-
-import { routeGuard } from '@/auth';
+import { routeGuard } from "@/auth";
 
 const routes = [
   {
     path: "/",
     name: "Home",
-    component: Home
+    component: Home,
   },
   {
-    path: "/about",
-    name: "About",
-    component: About,
-    beforeEnter: routeGuard
+    path: "/portfolio",
+    name: "Portfolio",
+    component: Portfolio,
+    beforeEnter: routeGuard,
   },
   {
-    path: '/callback',
-    name: 'Callback',
-    component: Callback
-  }
+    path: "/portfolio/:id",
+    name: "Account",
+    component: Account,
+    beforeEnter: routeGuard,
+  },
+  {
+    path: "/callback",
+    name: "Callback",
+    component: Callback,
+  },
 ];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
+  routes,
 });
 
 export default router;
