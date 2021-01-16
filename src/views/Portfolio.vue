@@ -31,13 +31,13 @@
       </div>
       <ul class="bg-white rounded-md rounded-tl-none rounded-tr-none">
         <li v-for="account in group.accounts" :key="account.id">
-          <a
+          <router-link
             class="flex justify-between p-3 items-center"
-            :href="`/portfolio/${account.id}`"
+            :to="`/portfolio/${account.id}`"
           >
             <span class="text-gray-700">{{ account.name }}</span>
             <span class="text-gray-700">{{ account.formattedBalance }}</span>
-          </a>
+          </router-link>
         </li>
       </ul>
     </div>

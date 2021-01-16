@@ -75,12 +75,13 @@
                 class="ml-8 font-medium text-gray-500 hover:text-gray-900 transition duration-150 ease-in-out"
                 >Contact</a
               >
-              <a
+              <router-link
                 v-if="auth.isAuthenticated.value"
-                href="/portfolio"
                 class="ml-8 font-medium text-blue-600 hover:text-blue-900 transition duration-150 ease-in-out"
-                >Go To App</a
+                to="portfolio"
               >
+                Go To App
+              </router-link>
               <a
                 v-else
                 href="#"
@@ -405,15 +406,16 @@
 </template>
 
 <script>
-  import { reactive } from "vue";
+  import { reactive, inject } from "vue";
 
   export default {
     name: "Home",
-    inject: ["auth"],
     setup() {
       const state = reactive({
         showMobileMenu: false,
       });
+
+      const auth = inject("auth");
 
       function toggleMobileMenu() {
         state.showMobileMenu = !state.showMobileMenu;
@@ -421,6 +423,7 @@
 
       return {
         state,
+        auth,
         toggleMobileMenu,
       };
     },
