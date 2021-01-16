@@ -44,9 +44,9 @@
 <script>
   import { reactive } from "vue";
   import Panel from "@/components/Panel.vue";
-  import MyzeButton from "../MyzeButton.vue";
-  import FormField from "@/components/forms/FormField.vue";
-  import SelectMenu from "@/components/forms/SelectMenu.vue";
+  import MyzeButton from "@/components/MyzeButton.vue";
+  import FormField from "@/components/forms/inputs/FormField.vue";
+  import SelectMenu from "@/components/forms/inputs/SelectMenu.vue";
   export default {
     components: { Panel, MyzeButton, FormField, SelectMenu },
     setup() {
