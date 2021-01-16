@@ -25,15 +25,26 @@
     </div>
   </div>
 
-  <!-- <Overview v-if="state.activeNavigation === 'overview'" Transactions="transactions" />
-    <TransactionsPage v-if="state.activeNavigation === 'transactions'" AccountId="AccountId" Transactions="transactions" />
-    <Recurring v-if="state.activeNavigation === 'recurring'" /> -->
+  <Overview
+    v-if="state.activeNavigation === 'overview'"
+    :transactions="state.transactions"
+  />
+  <Transactions
+    v-if="state.activeNavigation === 'transactions'"
+    :accountId="state.account.id"
+    :transactions="state.transactions"
+  />
+  <Recurring v-if="state.activeNavigation === 'recurring'" />
 </template>
 
 <script>
   import { reactive } from "vue";
+  import Overview from "@/components/account/Overview.vue";
+  import Transactions from "@/components/account/Transactions.vue";
+  import Recurring from "@/components/account/Recurring.vue";
 
   export default {
+    components: { Overview, Transactions, Recurring },
     setup() {
       const state = reactive({
         activeNavigation: "overview",
@@ -41,6 +52,7 @@
           name: "Account Name",
           formattedBalance: "$564.48",
         },
+        transactions: [],
       });
 
       const navLinks = {
