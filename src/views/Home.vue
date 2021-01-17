@@ -76,18 +76,17 @@
                 >Contact</a
               >
               <router-link
-                v-if="auth.isAuthenticated.value"
+                v-if="state.user !== null"
                 class="ml-8 font-medium text-blue-600 hover:text-blue-900 transition duration-150 ease-in-out"
                 to="portfolio"
               >
                 Go To App
               </router-link>
-              <a
+              <router-link
                 v-else
-                href="#"
+                to="login"
                 class="ml-8 font-medium text-blue-600 hover:text-blue-900 transition duration-150 ease-in-out"
-                @click="auth.loginWithRedirect"
-                >Log in</a
+                >Log in</router-link
               >
             </div>
           </nav>
@@ -167,7 +166,6 @@
               </div>
               <div>
                 <a
-                  v-if="auth.isAuthenticated.value"
                   href="/portfolio"
                   class="block w-full px-5 py-3 text-center font-medium text-blue-600 bg-gray-50 hover:bg-gray-100 hover:text-blue-700 focus:outline-none focus:bg-gray-100 focus:text-blue-700 transition duration-150 ease-in-out"
                   role="menuitem"
@@ -175,7 +173,6 @@
                   Go To App
                 </a>
                 <a
-                  v-else
                   href="#"
                   class="block w-full px-5 py-3 text-center font-medium text-blue-600 bg-gray-50 hover:bg-gray-100 hover:text-blue-700 focus:outline-none focus:bg-gray-100 focus:text-blue-700 transition duration-150 ease-in-out"
                   role="menuitem"
@@ -406,16 +403,16 @@
 </template>
 
 <script>
-  import { reactive, inject } from "vue";
+  import { reactive, inject, onMounted } from "vue";
+  import { user } from "@/auth/index.js";
 
   export default {
     name: "Home",
     setup() {
       const state = reactive({
         showMobileMenu: false,
+        user: user,
       });
-
-      const auth = inject("auth");
 
       function toggleMobileMenu() {
         state.showMobileMenu = !state.showMobileMenu;
@@ -423,7 +420,6 @@
 
       return {
         state,
-        auth,
         toggleMobileMenu,
       };
     },
