@@ -8,10 +8,12 @@
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.13.6",
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "dayjs": "^1.10.3",
     "firebase": "^8.2.3",
     "vue": "^3.0.0",
+    "vue-axios": "^3.2.2",
     "vue-router": "^4.0.0-0",
     "vuex": "^4.0.0-0"
   },
