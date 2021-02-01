@@ -7,7 +7,7 @@
 </template>
 
 <script>
-  import { watch, inject, defineComponent, reactive } from "vue";
+  import { watch, defineComponent, reactive } from "vue";
   import { useRouter } from "vue-router";
   import { user, auth } from "@/auth";
   export default defineComponent({
@@ -16,6 +16,7 @@
         email: "",
         password: "",
       });
+      
       const router = useRouter();
 
       async function login() {
