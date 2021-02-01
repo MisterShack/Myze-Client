@@ -1,5 +1,8 @@
 <template>
-  <div class="bg-green-100 text-green-900 shadow-md rounded-lg py-3 px-4 mb-5">
+  <div
+    v-if="Object.keys(notifications).length > 0"
+    class="bg-green-100 text-green-900 shadow-md rounded-lg py-3 px-4 mb-5"
+  >
     <p class="text-md font-bold">Keep it up!</p>
     <p class="text-sm">
       Your cash flow was up $587 in December compared to November. Go even
@@ -12,7 +15,13 @@
   >
     <div class="bg-white h-auto lg:flex-1 shadow-md rounded-lg p-6 pb-0">
       <h2 class="text-lg tracking-wide mb-3">Upcoming</h2>
-      <ul class="my-6">
+      <p
+        v-if="state.recurringTransactions.length === 0"
+        class="text-center py-10 text-gray-500"
+      >
+        No upcoming transactions!
+      </p>
+      <ul v-else class="my-6">
         <li
           class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
         >
@@ -45,7 +54,13 @@
     </div>
     <div class="bg-white h-auto lg:flex-1 shadow-md rounded-lg p-6 pb-0">
       <h2 class="text-lg tracking-wide mb-3">Latest</h2>
-      <ul class="my-6">
+      <p
+        v-if="transactions.length === 0"
+        class="text-center py-10 text-gray-500"
+      >
+        No transactions to display
+      </p>
+      <ul v-else class="my-6">
         <li
           class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
         >
@@ -107,9 +122,26 @@
 </template>
 
 <script>
+  import { reactive } from "vue";
   export default {
     props: {
-      transactions: [Array, null],
+      transactions: {
+        type: Array,
+        default: [],
+      },
+      notifications: {
+        type: Object,
+        default: {},
+      },
+    },
+    setup() {
+      const state = reactive({
+        recurringTransactions: [],
+      });
+
+      return {
+        state,
+      };
     },
   };
 </script>

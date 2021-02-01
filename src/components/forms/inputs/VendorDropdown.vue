@@ -1,7 +1,7 @@
 <template>
   <div class="mt-1 relative rounded-md shadow-sm">
     <input
-      v-model="state.selectedVendor.name"
+      v-model="selectedVendor.name"
       @input="filterVendors"
       class="form-input block w-full px-3 py-2 sm:text-sm sm:leading-5"
       id="t_vendor"
@@ -47,32 +47,33 @@
 </style>
 
 <script>
-  import { ref, reactive } from "vue";
+  import { reactive } from "vue";
   export default {
     props: {
       vendors: {
-        type: Array,
-        default: () => [],
+        type: Object,
+        default: () => {},
       },
+      selectedVendor: Object,
     },
-    emits: ["select-vendor"],
-    setup(props, context) {
+    setup(props) {
       const state = reactive({
         filteredVendors: [],
-        selectedVendor: {},
       });
 
-      const vendors = ref(props.vendors);
-
       function filterVendors() {
-        state.selectedVendor.id = null;
+        props.selectedVendor.id = null;
 
-        state.filteredVendors = vendors.value.filter(
-          (v) =>
-            v.name
-              .toLowerCase()
-              .indexOf(state.selectedVendor.name.toLowerCase()) >= 0
-        );
+        if (Object.keys(props.vendors).length === 0) {
+          state.filteredVendors = [];
+        } else {
+          state.filteredVendors = Object.values(props.vendors).filter(
+            (v) =>
+              v.name
+                .toLowerCase()
+                .indexOf(props.selectedVendor.name.toLowerCase()) >= 0
+          );
+        }
       }
 
       function clearVendors() {
@@ -80,14 +81,9 @@
       }
 
       function selectVendor(clickedVendor) {
-        state.selectedVendor = {
-          id: clickedVendor.id,
-          name: clickedVendor.name,
-        };
-
+        props.selectedVendor.id = clickedVendor.id;
+        props.selectedVendor.name = clickedVendor.name;
         clearVendors();
-
-        context.emit("select-vendor", state.selectedVendor);
       }
 
       return {

@@ -404,7 +404,7 @@
 
 <script>
   import { reactive, inject, onMounted } from "vue";
-  import { user } from "@/auth/index.js";
+  import { user, auth } from "@/auth/index.js";
 
   export default {
     name: "Home",
@@ -417,6 +417,7 @@
       function toggleMobileMenu() {
         state.showMobileMenu = !state.showMobileMenu;
       }
+
 
       return {
         state,
