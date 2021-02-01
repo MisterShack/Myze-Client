@@ -37,16 +37,24 @@
       />
     </FormField>
 
-    <myze-button theme="Success" @click="addAccount()">Add Account</myze-button>
+    <myze-button
+      theme="Success"
+      @click="addAccount()"
+      :disabled="!formValidated"
+      >Add Account</myze-button
+    >
   </Panel>
 </template>
 
 <script>
-  import { reactive } from "vue";
+  import { computed, reactive } from "vue";
   import Panel from "@/components/Panel.vue";
   import MyzeButton from "@/components/MyzeButton.vue";
   import FormField from "@/components/forms/inputs/FormField.vue";
   import SelectMenu from "@/components/forms/inputs/SelectMenu.vue";
+  import { createAccount } from "@/api/AccountApi.js";
+  import { useRouter } from "vue-router";
+
   export default {
     components: { Panel, MyzeButton, FormField, SelectMenu },
     setup() {
@@ -56,6 +64,15 @@
           startingBalance: 0,
           accountType: null,
         },
+      });
+
+      const router = useRouter();
+
+      const formValidated = computed(() => {
+        return (
+          state.newAccount.name.length > 0 &&
+          state.newAccount.accountType !== null
+        );
       });
 
       const accountTypes = {
@@ -68,13 +85,20 @@
       };
 
       function addAccount() {
-        console.log(state.newAccount);
+        // Update our starting balance to use cents rather than dollars
+        state.newAccount.startingBalance *= 100;
+
+        // Create the account using the API and redirect to the account page
+        createAccount(state.newAccount).then((res) =>
+          router.push(`/accounts/${res.data}`)
+        );
       }
 
       return {
         state,
         accountTypes,
         addAccount,
+        formValidated,
       };
     },
   };
