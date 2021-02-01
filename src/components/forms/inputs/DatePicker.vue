@@ -11,7 +11,7 @@
     <div v-if="state.showCalendar" class="absolute left-0 z-10">
       <Calendar
         :allowEmpty="state.required"
-        @select-date="selectDate($event)"
+        @select-date="selectDate"
         :selectedDate="state.selectedDate"
       />
       <div
@@ -42,12 +42,12 @@
 </style>
 
 <script>
-  import { onMounted, reactive, computed } from "vue";
+  import { reactive, computed, watch } from "vue";
   import dayjs from "dayjs";
   import Calendar from "@/components/forms/inputs/Calendar.vue";
   export default {
     props: {
-      selectedDate: Date,
+      selectedDate: String,
       required: Boolean,
     },
     emits: ["select-date", "clear"],
@@ -58,9 +58,16 @@
         showCalendar: false,
       });
 
-      const displayDate = computed(() =>
-        dayjs(state.selectedDate).format("MMMM DD, YYYY")
+      watch(
+        () => props.selectedDate,
+        (selectedDate) => {
+          state.selectedDate = selectedDate;
+        }
       );
+
+      const displayDate = computed(() => {
+        return dayjs(state.selectedDate).format("MMMM DD, YYYY");
+      });
 
       function toggleCalendar() {
         state.showCalendar = !state.showCalendar;
@@ -68,7 +75,7 @@
 
       function selectDate(date) {
         if (date !== null) {
-          state.selectedDate = date.toDate();
+          state.selectedDate = date.format("YYYY-MM-DD");
           state.displayDate = date;
         } else {
           state.selectedDate = null;
