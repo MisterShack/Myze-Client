@@ -17,9 +17,10 @@ auth.onAuthStateChanged(async (u) => {
   user.value = u;
   initialized.value = true;
 
-  axios.defaults.headers.common["Authorization"] = await u.getIdToken();
-
-  loadVendors();
+  if (u !== null) {
+    axios.defaults.headers.common["Authorization"] = await u.getIdToken();
+    loadVendors();
+  }
 });
 
 export async function logout() {
