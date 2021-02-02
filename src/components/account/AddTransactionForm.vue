@@ -7,7 +7,7 @@
     >
     <div class="mt-1 relative rounded-md shadow-sm">
       <DatePicker
-        :selectedDate="selectedDate"
+        :selectedDate="state.selectedDate"
         @select-date="selectDate"
         Required
       ></DatePicker>
@@ -134,6 +134,7 @@
       const state = reactive({
         transactions: [],
         vendors: getVendors(),
+        selectedDate: props.selectedDate,
       });
 
       watch(
@@ -141,6 +142,11 @@
         (transactions) => {
           state.transactions = transactions;
         }
+      );
+
+      watch(
+        () => props.selectedDate,
+        (selectedDate) => (state.selectedDate = selectedDate)
       );
 
       function addTransaction(type) {
@@ -212,6 +218,8 @@
           // Track our original transaction as it has the correct amount.
           transactionsSaved.push(t);
         }
+
+  
 
         emit("save-transactions", transactionsSaved);
         emit("close");

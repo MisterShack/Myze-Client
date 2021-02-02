@@ -54,14 +54,14 @@
     components: { Calendar },
     setup(props, context) {
       const state = reactive({
-        selectedDate: props.selectedDate,
+        selectedDate: dayjs(props.selectedDate),
         showCalendar: false,
       });
 
       watch(
         () => props.selectedDate,
         (selectedDate) => {
-          state.selectedDate = selectedDate;
+          state.selectedDate = dayjs(selectedDate);
         }
       );
 

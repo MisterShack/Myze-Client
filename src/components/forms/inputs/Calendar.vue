@@ -69,12 +69,11 @@
 
 <script>
   import dayjs from "dayjs";
-  import cheveron from "@/assets/icons/chevron-left.svg";
 
-  import { onMounted, reactive } from "vue";
+  import { onMounted, reactive, watch } from "vue";
   export default {
     props: {
-      selectedDate: [String, Date],
+      selectedDate: String,
       allowEmpty: Boolean,
     },
     emits: ["clear", "select-date"],
@@ -84,13 +83,18 @@
         showMonthPicker: false,
         activeMonth: dayjs(),
         calendarDatesByWeek: reactive([]),
+        selectedDate: dayjs(props.selectedDate),
       });
 
-      onMounted(() => {
-        if (props.selectedDate !== null) {
-          state.selectedDate = dayjs(props.selectedDate);
+      watch(
+        () => props.selectedDate,
+        (selectedDate) => {
+          state.selectedDate = dayjs(selectedDate);
+          console.log(props.selectedDate);
         }
+      );
 
+      onMounted(() => {
         state.activeMonth = state.selectedDate;
         state.calendarDatesByWeek = generateCalendarDatesFromDate(
           state.activeMonth
@@ -117,8 +121,6 @@
           state.activeMonth
         );
       }
-
-      // function changeCalendarMonth(month) { }
 
       function generateCalendarDatesFromDate(date) {
         let weeks = [];
@@ -167,7 +169,6 @@
         monthsByRow,
         previousMonth,
         nextMonth,
-        // changeCalendarMonth,
         generateCalendarDatesFromDate,
         selectDate,
       };
