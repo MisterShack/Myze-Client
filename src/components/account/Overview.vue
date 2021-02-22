@@ -11,6 +11,7 @@
   </div>
 
   <div
+    v-else
     class="flex space-y-5 flex-col lg:space-x-5 lg:flex-row lg:justify-between lg:items-baseline"
   >
     <div class="bg-white h-auto lg:flex-1 shadow-md rounded-lg p-6 pb-0">

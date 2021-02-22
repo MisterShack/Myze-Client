@@ -63,7 +63,6 @@
   >
     <template #title>Add Transactions</template>
     <AddTransactionForm
-      :accountId="accountId"
       :account="account"
       :transactions="state.selectedTransactions"
       :selectedDate="state.selectedDate"
@@ -73,7 +72,6 @@
 </template>
 
 <script>
-  import { computed, reactive, watch } from "vue";
   import { reactive, computed } from "vue";
   import { getVendors } from "@/store/vendor";
 
