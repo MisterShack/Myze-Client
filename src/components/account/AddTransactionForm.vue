@@ -105,16 +105,17 @@
 
 <script>
   import { reactive, watch } from "vue";
-  import DatePicker from "@/components/forms/inputs/DatePicker.vue";
-  import MyzeButton from "@/components/MyzeButton.vue";
-  import Collapsible from "@/components/forms/Collapsible.vue";
-  import VendorDropdown from "@/components/forms/inputs/VendorDropdown.vue";
+  import dayjs from "dayjs";
   import { createVendor, getVendors } from "@/store/vendor";
   import {
     createTransaction,
     updateTransaction,
   } from "@/api/TransactionApi.js";
-  import dayjs from "dayjs";
+
+  import Collapsible from "@/components/forms/Collapsible.vue";
+  import DatePicker from "@/components/forms/inputs/DatePicker.vue";
+  import MyzeButton from "@/components/MyzeButton.vue";
+  import VendorDropdown from "@/components/forms/inputs/VendorDropdown.vue";
 
   export default {
     props: {

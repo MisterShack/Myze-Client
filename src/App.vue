@@ -5,11 +5,11 @@
 </template>
 
 <script>
-  import HomeLayout from "@/layouts/HomeLayout.vue";
-  import AppLayout from "@/layouts/AppLayout.vue";
-
   import { useRoute } from "vue-router";
   import { computed } from "vue";
+
+  import HomeLayout from "@/layouts/HomeLayout.vue";
+  import AppLayout from "@/layouts/AppLayout.vue";
 
   export default {
     components: { HomeLayout, AppLayout },
