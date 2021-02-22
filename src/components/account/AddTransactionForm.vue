@@ -119,8 +119,8 @@
 
   export default {
     props: {
-      accountId: {
-        type: Number,
+      account: {
+        type: Object,
         required: true,
       },
       transactions: {
@@ -198,7 +198,7 @@
           }
 
           t.date = dayjs(state.selectedDate).format("YYYY-MM-DD");
-          t.accountId = props.accountId;
+          t.accountId = props.account.id;
 
           if (vendorsAdded[t.vendor.name]) {
             t.vendor = vendorsAdded[t.vendor.name];
@@ -219,8 +219,6 @@
           // Track our original transaction as it has the correct amount.
           transactionsSaved.push(t);
         }
-
-  
 
         emit("save-transactions", transactionsSaved);
         emit("close");

@@ -16,7 +16,7 @@
     <div class="bg-white h-auto lg:flex-1 shadow-md rounded-lg p-6 pb-0">
       <h2 class="text-lg tracking-wide mb-3">Upcoming</h2>
       <p
-        v-if="state.recurringTransactions.length === 0"
+        v-if="state.account.recurring.length === 0"
         class="text-center py-10 text-gray-500"
       >
         No upcoming transactions!
@@ -55,7 +55,7 @@
     <div class="bg-white h-auto lg:flex-1 shadow-md rounded-lg p-6 pb-0">
       <h2 class="text-lg tracking-wide mb-3">Latest</h2>
       <p
-        v-if="transactions.length === 0"
+        v-if="state.account.transactions.length === 0"
         class="text-center py-10 text-gray-500"
       >
         No transactions to display
@@ -123,20 +123,21 @@
 
 <script>
   import { reactive } from "vue";
+
   export default {
     props: {
-      transactions: {
-        type: Array,
-        default: [],
+      account: {
+        type: Object,
+        required: true,
       },
       notifications: {
         type: Object,
         default: {},
       },
     },
-    setup() {
+    setup(props) {
       const state = reactive({
-        recurringTransactions: [],
+        account: props.account,
       });
 
       return {

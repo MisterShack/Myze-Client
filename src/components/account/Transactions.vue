@@ -21,7 +21,10 @@
         Add Transaction
       </button>
     </div>
-    <p v-if="transactions.length === 0" class="text-center text-gray-500 py-10">
+    <p
+      v-if="state.transactions.length === 0"
+      class="text-center text-gray-500 py-10"
+    >
       No transactions to display!
     </p>
     <ul v-else class="my-6">
@@ -61,25 +64,27 @@
     <template #title>Add Transactions</template>
     <AddTransactionForm
       :accountId="accountId"
+      :account="account"
       :transactions="state.selectedTransactions"
       :selectedDate="state.selectedDate"
-      @save-transactions="addSavedTransactions($event)"
+      @save-transactions="addSavedTransactions"
     />
   </Panel>
 </template>
 
 <script>
   import { computed, reactive, watch } from "vue";
+  import { reactive, computed } from "vue";
   import { getVendors } from "@/store/vendor";
+
   import Panel from "@/components/Panel.vue";
   import AddTransactionForm from "@/components/account/AddTransactionForm.vue";
 
   export default {
     props: {
-      accountId: Number,
-      transactions: {
-        type: Array,
-        default: [],
+      account: {
+        type: Object,
+        required: true,
       },
       notifications: {
         type: Array,
@@ -93,18 +98,21 @@
         selectedTransactions: [],
         showTransactionPanel: false,
         vendors: getVendors(),
+        transactions: props.account.transactions,
       });
 
       const transactionsByDate = computed(() => {
         let transactionsByDate = {};
 
-        props.transactions.forEach((t) => {
-          if (!transactionsByDate[t.date]) {
-            transactionsByDate[t.date] = [];
+        for (let transactionId of Object.keys(state.transactions)) {
+          let transaction = state.transactions[transactionId];
+
+          if (!transactionsByDate[transaction.date]) {
+            transactionsByDate[transaction.date] = [];
           }
 
-          transactionsByDate[t.date].push(t);
-        });
+          transactionsByDate[transaction.date].push(transaction);
+        }
 
         return transactionsByDate;
       });
@@ -123,7 +131,9 @@
       }
 
       function addSavedTransactions(savedTransactions) {
-        console.log(savedTransactions);
+        for (let transaction of savedTransactions) {
+          state.transactions[transaction.id] = transaction;
+        }
       }
 
       return {
