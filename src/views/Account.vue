@@ -1,5 +1,5 @@
 <template>
-  <div v-if="state.account === null">
+  <div v-if="state.loading">
     <p>Loading...</p>
   </div>
   <template v-else>
@@ -29,23 +29,25 @@
       </div>
     </div>
 
-    <Overview
-      v-if="state.activeNavigation === 'overview'"
-      :transactions="state.account.transactions"
-    />
-    <Transactions
-      v-if="state.activeNavigation === 'transactions'"
-      :accountId="state.account.id"
-      :transactions="state.account.transactions"
-    />
-    <Recurring v-if="state.activeNavigation === 'recurring'" />
+    <template v-if="!state.loading">
+      <Overview
+        v-if="state.activeNavigation === 'overview'"
+        :account="state.account"
+      />
+      <Transactions
+        v-if="state.activeNavigation === 'transactions'"
+        :account="state.account"
+      />
+      <Recurring v-if="state.activeNavigation === 'recurring'" />
+    </template>
   </template>
 </template>
 
 <script>
-  import { onMounted, reactive } from "vue";
-  import { useRoute, useRouter } from "vue-router";
-  import { getAccount } from "@/api/AccountApi.js";
+  import { reactive } from "vue";
+  import { useRoute } from "vue-router";
+  import { accountStore } from "@/store/account-store.js";
+
   import Overview from "@/components/account/Overview.vue";
   import Transactions from "@/components/account/Transactions.vue";
   import Recurring from "@/components/account/Recurring.vue";
@@ -53,23 +55,13 @@
   export default {
     components: { Overview, Transactions, Recurring },
     setup() {
-      const state = reactive({
-        activeNavigation: "overview",
-        account: null,
-        notifications: [],
-      });
-
       let route = useRoute();
-      let router = useRouter();
 
-      onMounted(() => {
-        getAccount(route.params.id).then((res) => {
-          if (res === false) {
-            router.push("/portfolio");
-          } else {
-            state.account = res.data;
-          }
-        });
+      const state = reactive({
+        loading: true,
+        activeNavigation: "overview",
+        account: {},
+        notifications: [],
       });
 
       const navLinks = {
@@ -79,6 +71,11 @@
         analytics: "Analytics",
         settings: "Settings",
       };
+
+      accountStore.loadAccounts().then(() => {
+        state.account = accountStore.getAccount(route.params.id);
+        state.loading = false;
+      });
 
       return {
         state,
