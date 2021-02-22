@@ -7,15 +7,10 @@
       >Account</myze-button
     >
   </div>
-  <div
-    v-if="state.accountsByType === null"
-    class="mt-20 text-center text-xl text-gray-600"
-  >
-    <p>Loading...</p>
-  </div>
 
+  <p v-if="state.loading">Loading...</p>
   <div
-    v-else-if="state.accountsByType.length === 0"
+    v-else-if="Object.keys(accountStore.state.accountsByType).length === 0"
     class="mt-20 text-center text-xl text-gray-600"
   >
     <p class="text-2xl font-bold">No accounts found!</p>
@@ -25,12 +20,12 @@
     <div class="p-5 rounded-md bg-indigo-200">
       <p class="text-sm text-gray-600">Available</p>
       <p class="text-gray-700 font-medium text-4xl">
-        ${{ (availableBalance / 100).toFixed(2) }}
+        ${{ (accountStore.availableBalance.value / 100).toFixed(2) }}
       </p>
     </div>
 
     <div
-      v-for="(group, accountType) in state.accountsByType"
+      v-for="group in accountStore.state.accountsByType"
       :key="group"
       class="my-5 shadow-sm"
     >
@@ -38,18 +33,22 @@
         class="flex justify-between items-center font-medium p-3 rounded-md rounded-b-none bg-gray-600"
       >
         <span class="text-gray-200 font-normal tracking-wider">
-          {{ accountTypes[accountType] }}
+          {{ group.label }}
         </span>
-        <span class="text-gray-100">{{ group.formattedBalance }}</span>
+        <span class="text-gray-100"
+          >${{ (group.balance / 100).toFixed(2) }}</span
+        >
       </div>
       <ul class="bg-white rounded-md rounded-tl-none rounded-tr-none">
-        <li v-for="account in group" :key="account.id">
+        <li v-for="account in group.accounts" :key="account.id">
           <router-link
             class="flex justify-between p-3 items-center"
             :to="`/portfolio/${account.id}`"
           >
             <span class="text-gray-700">{{ account.name }}</span>
-            <span class="text-gray-700">${{ (account.balance / 100).toFixed(2) }}</span>
+            <span class="text-gray-700"
+              >${{ (account.balance / 100).toFixed(2) }}</span
+            >
           </router-link>
         </li>
       </ul>
@@ -63,57 +62,27 @@
 </template>
 
 <script>
-  import { reactive, onMounted, computed } from "vue";
+  import { reactive } from "vue";
   import MyzeButton from "../components/MyzeButton.vue";
   import AddAccountPanel from "@/components/account/AddAccountPanel.vue";
-  import { getAccounts } from "@/api/AccountApi.js";
+  import { accountStore } from "@/store/account-store";
   export default {
     components: { MyzeButton, AddAccountPanel },
     setup() {
       const state = reactive({
+        loading: true,
         showAddAccountPanel: false,
-        accountsByType: null,
       });
-
-      onMounted(() => {
-        getAccounts().then((res) => {
-          state.accountsByType = res.data;
-        });
-      });
-
-      const availableBalance = computed(() => {
-        let availableBalance = 0;
-
-        if (
-          typeof state.accountsByType === "object" &&
-          state.accountsByType["CHEQUING"]
-        ) {
-          availableBalance += state.accountsByType["CHEQUING"]
-            .map((a) => parseInt(a.balance))
-            .reduce((accumulator, value) => accumulator + value);
-        }
-
-        return availableBalance;
-      });
-
-      const accountTypes = {
-        CHEQUING: "Chequing",
-        SAVINGS: "Savings",
-        TFSA: "Tax-Free Savings Account",
-        MORTGAGE: "Mortgages",
-        LOAN: "Loans",
-        RRSP: "Retirement Savings Plan",
-        RESP: "Education Savings Plan",
-      };
 
       function showAddAccountPanel() {
         state.showAddAccountPanel = true;
       }
 
+      accountStore.loadAccounts().then(() => (state.loading = false));
+
       return {
         state,
-        availableBalance,
-        accountTypes,
+        accountStore,
         showAddAccountPanel,
       };
     },
