@@ -62,12 +62,15 @@
     @close="state.showTransactionPanel = false"
   >
     <template #title>Add Transactions</template>
-    <AddTransactionForm
-      :account="account"
-      :transactions="state.selectedTransactions"
-      :selectedDate="state.selectedDate"
-      @save-transactions="addSavedTransactions"
-    />
+    <template v-slot="scope">
+      <AddTransactionForm
+        :account="account"
+        :transactions="state.selectedTransactions"
+        :selectedDate="state.selectedDate"
+        @save-transactions="addSavedTransactions"
+        @close="scope.close"
+      />
+    </template>
   </Panel>
 </template>
 
