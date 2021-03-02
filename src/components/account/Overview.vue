@@ -18,7 +18,7 @@
       <h2 class="text-lg tracking-wide mb-3">Upcoming</h2>
       <p
         v-if="state.account.recurring.length === 0"
-        class="text-center py-10 text-gray-500"
+        class="text-center pt-5 pb-10 text-gray-500"
       >
         No upcoming transactions!
       </p>
@@ -57,73 +57,42 @@
       <h2 class="text-lg tracking-wide mb-3">Latest</h2>
       <p
         v-if="state.account.transactions.length === 0"
-        class="text-center py-10 text-gray-500"
+        class="text-center pt-5 pb-10 text-gray-500"
       >
         No transactions to display
       </p>
       <ul v-else class="my-6">
-        <li
-          class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
+        <template
+          v-for="(transactions, date) in latestTransactions"
+          :key="date"
         >
-          April 1st, 2020
-        </li>
-        <li>
-          <ul class="mb-5">
-            <li
-              class="py-1 mb-2 flex items-center justify-between text-gray-600"
-            >
-              <span>Amazon</span>
-              <span class="text-lg">$56.98</span>
-            </li>
-            <li
-              class="py-1 my-2 flex items-center justify-between text-gray-600"
-            >
-              <span>Wal-Mart</span>
-              <span class="text-lg">$56.98</span>
-            </li>
-            <li
-              class="py-1 my-2 flex items-center justify-between text-gray-600"
-            >
-              <span>PetroCan</span>
-              <span class="text-lg">$74.54</span>
-            </li>
-          </ul>
-        </li>
-
-        <li
-          class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
-        >
-          May 22nd, 2020
-        </li>
-        <li>
-          <ul>
-            <li
-              class="py-1 mb-2 flex items-center justify-between text-gray-600"
-            >
-              <span>Old Navy</span>
-              <span class="text-lg">$56.98</span>
-            </li>
-            <li
-              class="py-1 my-2 flex items-center justify-between text-gray-600"
-            >
-              <span>Wal-Mart</span>
-              <span class="text-lg">$59.28</span>
-            </li>
-            <li
-              class="py-1 my-2 flex items-center justify-between text-gray-600"
-            >
-              <span>PetroCan</span>
-              <span class="text-lg">$74.54</span>
-            </li>
-          </ul>
-        </li>
+          <li
+            class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
+          >
+            {{ date }}
+          </li>
+          <li>
+            <ul class="mb-5">
+              <li
+                v-for="transaction in transactions"
+                :key="transaction.id"
+                class="py-1 mb-2 flex items-center justify-between text-gray-600"
+              >
+                <span>{{ transaction.vendor.name }}</span>
+                <span class="text-lg"
+                  >${{ (transaction.amount / 100).toFixed(2) }}</span
+                >
+              </li>
+            </ul>
+          </li>
+        </template>
       </ul>
     </div>
   </div>
 </template>
 
 <script>
-  import { reactive } from "vue";
+  import { computed, reactive, watch } from "vue";
 
   export default {
     props: {
@@ -141,8 +110,58 @@
         account: props.account,
       });
 
+      watch(
+        () => props.account,
+        (account) => (state.account = account)
+      );
+
+      const sortedTransactionDates = computed(() =>
+        Object.keys(props.account.transactions).sort(
+          (a, b) => new Date(b) - new Date(a)
+        )
+      );
+
+      const latestTransactions = computed(() => {
+        let latestTransactions = {};
+        let amountRemaining = 5;
+
+        for (
+          let i = 0;
+          i < sortedTransactionDates.value.length && amountRemaining > 0;
+          i++
+        ) {
+          let date = sortedTransactionDates.value[i];
+
+          let transactionsForDate = props.account.transactions[date];
+
+          // If there's enough room for all the transaction in this day, let's add them all
+          if (transactionsForDate.length <= amountRemaining) {
+            latestTransactions[date] = transactionsForDate;
+            count -= transactionsForDate.length;
+          } else {
+            latestTransactions[date] = {};
+
+            let transactions = Object.values(transactionsForDate);
+
+            for (
+              let j = 0;
+              j < transactions.length && amountRemaining > 0;
+              j++
+            ) {
+              let transaction = transactions[j];
+
+              latestTransactions[date][transaction.id] = transaction;
+              amountRemaining--;
+            }
+          }
+        }
+
+        return latestTransactions;
+      });
+
       return {
         state,
+        latestTransactions,
       };
     },
   };
