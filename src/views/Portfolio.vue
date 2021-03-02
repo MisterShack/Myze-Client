@@ -55,19 +55,23 @@
     </div>
   </template>
 
-  <AddAccountPanel
-    :show="state.showAddAccountPanel"
+  <Panel
+    :active="state.showAddAccountPanel"
     @close="state.showAddAccountPanel = false"
-  />
+  >
+    <template #title>Add Account</template>
+    <AddAccountPanel />
+  </Panel>
 </template>
 
 <script>
   import { reactive } from "vue";
   import MyzeButton from "../components/MyzeButton.vue";
+  import Panel from "@/components/Panel.vue";
   import AddAccountPanel from "@/components/account/AddAccountPanel.vue";
   import { accountStore } from "@/store/account-store";
   export default {
-    components: { MyzeButton, AddAccountPanel },
+    components: { MyzeButton, AddAccountPanel, Panel },
     setup() {
       const state = reactive({
         loading: true,

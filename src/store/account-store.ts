@@ -193,7 +193,7 @@ class AccountStore {
     const response = await AccountApi.createAccount(newAccount);
 
     const account: Myze.Account = {
-      id: response.data,
+      id: response.data.account_id,
       ...newAccount,
       transactions: {},
       recurring: [],
