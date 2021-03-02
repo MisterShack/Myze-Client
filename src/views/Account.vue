@@ -46,7 +46,7 @@
 <script>
   import { reactive } from "vue";
   import { useRoute } from "vue-router";
-  import { accountStore } from "@/store/account-store.js";
+  import { accountStore } from "@/store/account-store.ts";
 
   import Overview from "@/components/account/Overview.vue";
   import Transactions from "@/components/account/Transactions.vue";
