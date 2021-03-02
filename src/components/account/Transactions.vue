@@ -16,7 +16,7 @@
       <h2 class="text-lg tracking-wide">Transactions</h2>
       <button
         class="bg-green-100 py-2 px-4 text-xs font-semibold text-green-900 border border-green-500 border-opacity-20 hover:border-opacity-100 transition-all duration-300 ease-in-out rounded-md"
-        @click="openTransactionPanel('2021-01-26')"
+        @click="openTransactionPanel(new Date().toISOString().substring(0, 10))"
       >
         Add Transaction
       </button>
