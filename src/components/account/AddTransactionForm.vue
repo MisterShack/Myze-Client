@@ -21,7 +21,7 @@
           ? transaction.vendor.name
           : "New Transaction"
       }}</span>
-      <span>{{ getFormattedTransactionAmount(transaction) }}</span>
+      <span>${{ (transaction.amount / 100).toFixed(2) }}</span>
     </template>
 
     <div class="mb-5">
@@ -75,10 +75,7 @@
       </div>
     </div>
 
-    <MyzeButton
-      class="mt-5"
-      theme="Danger"
-      @click="removeTransaction(transaction)"
+    <MyzeButton class="mt-5" theme="Danger" @click="removeTransaction(key)"
       >Delete</MyzeButton
     >
   </Collapsible>
@@ -105,12 +102,8 @@
 
 <script>
   import { reactive, watch } from "vue";
-  import dayjs from "dayjs";
-  import { createVendor, getVendors } from "@/store/vendor";
-  import {
-    createTransaction,
-    updateTransaction,
-  } from "@/api/TransactionApi.js";
+  import { getVendors } from "@/store/vendor";
+  import { accountStore } from "@/store/account-store.ts";
 
   import Collapsible from "@/components/forms/Collapsible.vue";
   import DatePicker from "@/components/forms/inputs/DatePicker.vue";
@@ -123,32 +116,38 @@
         type: Object,
         required: true,
       },
-      transactions: {
-        type: Array,
-        default: () => [],
-      },
       selectedDate: String,
     },
     components: { DatePicker, Collapsible, VendorDropdown, MyzeButton },
-    emits: ["save-transactions", "close"],
+    emits: ["close"],
     setup(props, { emit }) {
       const state = reactive({
-        transactions: [],
         vendors: getVendors(),
         selectedDate: props.selectedDate,
+        transactions: [],
+        transactionsByDate: props.account.transactions,
       });
 
       watch(
-        () => props.transactions,
-        (transactions) => {
-          state.transactions = transactions;
+        () => props.selectedDate,
+        (selectedDate) => {
+          selectDate(selectedDate);
         }
       );
 
-      watch(
-        () => props.selectedDate,
-        (selectedDate) => (state.selectedDate = selectedDate)
-      );
+      function refreshTransactions() {
+        state.transactions = [];
+
+        if (state.transactionsByDate[state.selectedDate]) {
+          Object.values(state.transactionsByDate[state.selectedDate]).forEach(
+            (transaction) => {
+              state.transactions.push(
+                Object.fromEntries(Object.entries(transaction))
+              );
+            }
+          );
+        }
+      }
 
       function addTransaction(type) {
         state.transactions.push({
@@ -162,74 +161,35 @@
         });
       }
 
-      function getFormattedTransactionAmount(transaction) {
-        let formattedAmount = `$${(transaction.amount / 100).toFixed(2)}`;
-
-        if (transaction.type === "DEBIT" && transaction.amount > 0) {
-          formattedAmount = "-" + formattedAmount;
-        }
-
-        return formattedAmount;
-      }
-
       function selectDate(date) {
         state.selectedDate = date;
         refreshTransactions();
       }
 
-      function refreshTransactions() {
-        // TODO - Get Transactions for specific day
-        state.transactions = [];
-      }
+      async function removeTransaction(transactionIdx) {
+        // Remove from DB, and local store
+        await accountStore.removeTransaction(
+          state.transactions[transactionIdx]
+        );
 
-      function removeTransaction(transaction) {
-        // Delete Transaction from API
-        let transactionIdx = state.transactions.indexOf(transaction);
+        // Remove from this panel list
         state.transactions.splice(transactionIdx, 1);
       }
 
+      // TODO - Move to a service/store file
       async function save() {
-        let transactionsSaved = [];
-        let vendorsAdded = {};
-
-        for (let t of state.transactions) {
-          if (t.vendor.name.length === 0) {
-            continue;
-          }
-
-          t.date = dayjs(state.selectedDate).format("YYYY-MM-DD");
-          t.accountId = props.account.id;
-
-          if (vendorsAdded[t.vendor.name]) {
-            t.vendor = vendorsAdded[t.vendor.name];
-          } else if (t.vendor.id === null) {
-            // Create a new vendor using the provided name
-            t.vendor = await createVendor(t.vendor.name);
-
-            vendorsAdded[t.vendor.name] = t.vendor;
-          }
-
-          if (t.id > 0) {
-            updateTransaction(t.id, t);
-          } else {
-            // Update the original state
-            t.id = await createTransaction(t);
-          }
-
-          // Track our original transaction as it has the correct amount.
-          transactionsSaved.push(t);
-        }
-
-        emit("save-transactions", transactionsSaved);
+        await accountStore.saveTransactions(
+          props.account.id,
+          state.selectedDate,
+          state.transactions
+        );
         emit("close");
       }
 
       return {
         state,
         addTransaction,
-        refreshTransactions,
         removeTransaction,
-        getFormattedTransactionAmount,
         save,
         selectDate,
       };

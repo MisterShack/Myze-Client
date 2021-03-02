@@ -22,13 +22,13 @@
       </button>
     </div>
     <p
-      v-if="state.transactions.length === 0"
+      v-if="state.transactionsByDate === 0"
       class="text-center text-gray-500 py-10"
     >
       No transactions to display!
     </p>
     <ul v-else class="my-6">
-      <template v-for="(transactions, date) in transactionsByDate" :key="date">
+      <template v-for="date in state.sortedTransactionDates" :key="date">
         <li
           class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
         >
@@ -37,7 +37,7 @@
         <li class="mb-5" @click="openTransactionPanel(date)">
           <ul>
             <li
-              v-for="transaction in transactions"
+              v-for="transaction in state.transactionsByDate[date]"
               :key="`Transaction_${transaction.id}`"
               class="py-1 flex items-center justify-between text-gray-600"
             >
@@ -65,9 +65,7 @@
     <template v-slot="scope">
       <AddTransactionForm
         :account="account"
-        :transactions="state.selectedTransactions"
         :selectedDate="state.selectedDate"
-        @save-transactions="addSavedTransactions"
         @close="scope.close"
       />
     </template>
@@ -75,8 +73,9 @@
 </template>
 
 <script>
-  import { reactive, computed } from "vue";
+  import { reactive, computed, watch } from "vue";
   import { getVendors } from "@/store/vendor";
+  import { accountStore } from "@/store/account-store.ts";
 
   import Panel from "@/components/Panel.vue";
   import AddTransactionForm from "@/components/account/AddTransactionForm.vue";
@@ -84,7 +83,6 @@
   export default {
     props: {
       account: {
-        type: Object,
         required: true,
       },
       notifications: {
@@ -96,52 +94,33 @@
     setup(props) {
       const state = reactive({
         selectedDate: null,
-        selectedTransactions: [],
         showTransactionPanel: false,
         vendors: getVendors(),
-        transactions: props.account.transactions,
+        transactionsByDate: props.account.transactions,
+        sortedTransactionDates: [],
       });
 
-      const transactionsByDate = computed(() => {
-        let transactionsByDate = {};
+      watch(
+        () => props.account.transactions,
+        (transactions) => (state.transactionsByDate = transactions)
+      );
 
-        for (let transactionId of Object.keys(state.transactions)) {
-          let transaction = state.transactions[transactionId];
-
-          if (!transactionsByDate[transaction.date]) {
-            transactionsByDate[transaction.date] = [];
-          }
-
-          transactionsByDate[transaction.date].push(transaction);
-        }
-
-        return transactionsByDate;
+      accountStore.loadAccounts().then(() => {
+        state.sortedTransactionDates = computed(() =>
+          Object.keys(state.transactionsByDate).sort(
+            (a, b) => new Date(b) - new Date(a)
+          )
+        );
       });
 
       function openTransactionPanel(date) {
-        state.selectedTransactions = [];
-
-        if (transactionsByDate.value[date]) {
-          transactionsByDate.value[date].forEach((t) =>
-            state.selectedTransactions.push({ ...t })
-          );
-        }
-
         state.selectedDate = date;
         state.showTransactionPanel = true;
       }
 
-      function addSavedTransactions(savedTransactions) {
-        for (let transaction of savedTransactions) {
-          state.transactions[transaction.id] = transaction;
-        }
-      }
-
       return {
         state,
-        addSavedTransactions,
         openTransactionPanel,
-        transactionsByDate,
       };
     },
   };
