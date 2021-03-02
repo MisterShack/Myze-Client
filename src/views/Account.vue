@@ -3,8 +3,28 @@
     <p>Loading...</p>
   </div>
   <template v-else>
+    <router-link
+      class="flex items-center text-gray-600 cursor-pointer"
+      to="/portfolio"
+    >
+      <svg
+        class="h-4"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10 19l-7-7m0 0l7-7m-7 7h18"
+        />
+      </svg>
+      <span class="pl-1">Back</span>
+    </router-link>
     <div
-      class="flex flex-wrap justify-center py-10 items-center md:justify-between"
+      class="flex flex-wrap justify-center pb-10 items-center md:justify-between"
     >
       <div class="text-center mb-5 w-full md:text-left md:mb-0 md:w-auto">
         <h1 class="font-thin text-lg mb-5 md:mb-0">{{ state.account.name }}</h1>
