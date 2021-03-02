@@ -27,7 +27,7 @@
       class="flex flex-wrap justify-center pb-10 items-center md:justify-between"
     >
       <div class="text-center mb-5 w-full md:text-left md:mb-0 md:w-auto">
-        <h1 class="font-thin text-lg mb-5 md:mb-0">{{ state.account.name }}</h1>
+        <h1 class="font-thin text-lg">{{ state.account.name }}</h1>
         <h3 class="text-4xl text-light-blue-700 md:text-3xl">
           ${{ (state.account.balance / 100).toFixed(2) }}
         </h3>
