@@ -59,6 +59,11 @@
         :account="state.account"
       />
       <Recurring v-if="state.activeNavigation === 'recurring'" />
+
+      <Settings
+        v-if="state.activeNavigation === 'settings'"
+        :account="state.account"
+      />
     </template>
   </template>
 </template>
@@ -71,9 +76,10 @@
   import Overview from "@/components/account/Overview.vue";
   import Transactions from "@/components/account/Transactions.vue";
   import Recurring from "@/components/account/Recurring.vue";
+  import Settings from "@/components/account/Settings.vue";
 
   export default {
-    components: { Overview, Transactions, Recurring },
+    components: { Overview, Transactions, Recurring, Settings },
     setup() {
       let route = useRoute();
 

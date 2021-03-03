@@ -203,6 +203,11 @@ class AccountStore {
 
     return account;
   }
+
+  async deleteAccount(accountId: number) {
+    await AccountApi.deleteAccount(accountId);
+    delete this.state.accounts[accountId];
+  }
 }
 
 export const accountStore = new AccountStore();

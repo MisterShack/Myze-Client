@@ -5,6 +5,14 @@ export function createAccount(accountData) {
   return axios.post("/accounts", accountData);
 }
 
+export function deleteAccount(accountId) {
+  return axios.delete("/accounts", {
+    data: {
+      id: accountId,
+    },
+  });
+}
+
 export function getAccounts() {
   return axios.get("/accounts");
 }
@@ -17,4 +25,5 @@ export default {
   createAccount,
   getAccounts,
   getAccount,
+  deleteAccount,
 };
