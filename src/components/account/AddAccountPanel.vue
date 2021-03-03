@@ -78,7 +78,6 @@
       async function addAccount() {
         // Create the account using the API and redirect to the account page
         const account = await accountStore.createAccount(state.newAccount);
-        console.log(account);
         router.push(`/portfolio/${account.id}`);
       }
 

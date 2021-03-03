@@ -85,7 +85,6 @@
       );
 
       function close() {
-        console.log("closing");
         state.show = false;
         setTimeout(() => {
           state.visible = false;

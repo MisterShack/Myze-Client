@@ -56,7 +56,7 @@
     <div class="bg-white h-auto lg:flex-1 shadow-md rounded-lg p-6 pb-0">
       <h2 class="text-lg tracking-wide mb-3">Latest</h2>
       <p
-        v-if="state.account.transactions.length === 0"
+        v-if="Object.keys(state.account.transactions).length === 0"
         class="text-center pt-5 pb-10 text-gray-500"
       >
         No transactions to display
@@ -132,7 +132,7 @@
         ) {
           let date = sortedTransactionDates.value[i];
 
-          let transactionsForDate = props.account.transactions[date];
+          let transactionsForDate = state.account.transactions[date];
 
           // If there's enough room for all the transaction in this day, let's add them all
           if (transactionsForDate.length <= amountRemaining) {

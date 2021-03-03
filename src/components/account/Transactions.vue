@@ -22,13 +22,13 @@
       </button>
     </div>
     <p
-      v-if="state.transactionsByDate === 0"
+      v-if="Object.keys(state.transactionsByDate).length === 0"
       class="text-center text-gray-500 py-10"
     >
       No transactions to display!
     </p>
     <ul v-else class="my-6">
-      <template v-for="date in state.sortedTransactionDates" :key="date">
+      <template v-for="date in sortedTransactionDates" :key="date">
         <li
           class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
         >
@@ -73,9 +73,8 @@
 </template>
 
 <script>
-  import { reactive, computed, watch } from "vue";
+  import { reactive, computed, watch, onBeforeMount } from "vue";
   import { getVendors } from "@/store/vendor";
-  import { accountStore } from "@/store/account-store.ts";
 
   import Panel from "@/components/Panel.vue";
   import AddTransactionForm from "@/components/account/AddTransactionForm.vue";
@@ -97,21 +96,20 @@
         showTransactionPanel: false,
         vendors: getVendors(),
         transactionsByDate: props.account.transactions,
-        sortedTransactionDates: [],
       });
+
+      const sortedTransactionDates = computed(() =>
+        Object.keys(props.account.transactions).sort(
+          (a, b) => new Date(b) - new Date(a)
+        )
+      );
 
       watch(
         () => props.account.transactions,
-        (transactions) => (state.transactionsByDate = transactions)
+        (transactions) => {
+          state.transactionsByDate = transactions;
+        }
       );
-
-      accountStore.loadAccounts().then(() => {
-        state.sortedTransactionDates = computed(() =>
-          Object.keys(state.transactionsByDate).sort(
-            (a, b) => new Date(b) - new Date(a)
-          )
-        );
-      });
 
       function openTransactionPanel(date) {
         state.selectedDate = date;
@@ -120,6 +118,7 @@
 
       return {
         state,
+        sortedTransactionDates,
         openTransactionPanel,
       };
     },

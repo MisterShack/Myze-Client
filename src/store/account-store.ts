@@ -120,20 +120,14 @@ class AccountStore {
 
       // If the transaction already exists, let's remove the previous amount
       if (this.getAccount(accountId).transactions[t.date][t.id]) {
-        this.removeTransactionFromAccountBalance(
-          this.getAccount(accountId),
-          this.getAccount(accountId).transactions[t.date][t.id]
-        );
+        this.removeTransactionFromAccountBalance(this.getAccount(accountId), t);
       }
 
       this.getAccount(accountId).transactions[t.date][
         t.id
       ] = t as Myze.Transaction;
 
-      this.addTransactionToAccountBalance(
-        this.getAccount(accountId),
-        this.getAccount(accountId).transactions[t.date][t.id]
-      );
+      this.addTransactionToAccountBalance(this.getAccount(accountId), t);
     }
   }
 
