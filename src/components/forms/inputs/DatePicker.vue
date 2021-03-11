@@ -1,12 +1,11 @@
 <template>
   <div class="relative">
-    <input
-      class="form-input block w-full px-3 py-2 sm:text-sm sm:leading-5"
-      type="text"
-      placeholder="Select a date..."
-      @focus="toggleCalendar()"
-      v-model="displayDate"
-    />
+    <button
+      class="form-input block w-full px-3 py-2 sm:text-sm sm:leading-5 text-left"
+      @click="toggleCalendar"
+    >
+      {{ displayDate }}
+    </button>
 
     <div v-if="state.showCalendar" class="absolute left-0 z-10">
       <Calendar
@@ -48,7 +47,10 @@
   export default {
     props: {
       selectedDate: String,
-      required: Boolean,
+      required: {
+        type: Boolean,
+        default: false,
+      },
     },
     emits: ["select-date", "clear"],
     components: { Calendar },
@@ -67,7 +69,11 @@
       );
 
       const displayDate = computed(() => {
-        return dayjs(state.selectedDate).format("MMMM DD, YYYY");
+        if (state.selectedDate === null) {
+          return "Select a date...";
+        } else {
+          return dayjs(state.selectedDate).format("MMMM DD, YYYY");
+        }
       });
 
       function toggleCalendar() {
