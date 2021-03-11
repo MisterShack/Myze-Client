@@ -4,7 +4,8 @@
       <template #label>Start Date</template>
       <DatePicker
         :selectedDate="state.recurring.start_date"
-        Required
+        @select-date="state.recurring.start_date = $event"
+        required
       ></DatePicker>
     </FormField>
 
@@ -12,6 +13,7 @@
       <template #label>End Date</template>
       <DatePicker
         :selectedDate="state.recurring.end_date"
+        @select-date="state.recurring.end_date = $event"
         anchor="BR"
       ></DatePicker>
     </FormField>
