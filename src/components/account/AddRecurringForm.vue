@@ -76,7 +76,7 @@
     v-if="state.recurring.id !== null"
     class="mt-5"
     theme="Danger"
-    @click="removeRecurring(key)"
+    @click="removeRecurring"
     >Delete</MyzeButton
   >
 
@@ -161,9 +161,16 @@
         emit("close");
       }
 
+      async function removeRecurring() {
+        // Remove from DB, and local store
+        await accountStore.removeRecurring(state.recurring);
+        emit("close");
+      }
+
       return {
         state,
         save,
+        removeRecurring,
       };
     },
   };

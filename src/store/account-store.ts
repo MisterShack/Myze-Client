@@ -225,6 +225,11 @@ class AccountStore {
     return recurring;
   }
 
+  async removeRecurring(recurring: Myze.Recurring) {
+    await RecurringApi.deleteRecurring(recurring.id);
+    delete this.state.accounts[recurring.account_id].recurring[recurring.id];
+  }
+
   async deleteAccount(accountId: number) {
     await AccountApi.deleteAccount(accountId);
     delete this.state.accounts[accountId];
