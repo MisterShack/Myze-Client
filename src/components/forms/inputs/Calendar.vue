@@ -83,14 +83,20 @@
         showMonthPicker: false,
         activeMonth: dayjs(),
         calendarDatesByWeek: reactive([]),
-        selectedDate: dayjs(props.selectedDate),
+        selectedDate:
+          props.selectedDate === null ? dayjs() : dayjs(props.selectedDate),
       });
+
+      watch(
+        () => props.allowEmpty,
+        (allowEmpty) => (state.allowEmpty = allowEmpty)
+      );
 
       watch(
         () => props.selectedDate,
         (selectedDate) => {
-          state.selectedDate = dayjs(selectedDate);
-          console.log(props.selectedDate);
+          state.selectedDate =
+            selectedDate === null ? dayjs() : dayjs(selectedDate);
         }
       );
 
