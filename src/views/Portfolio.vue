@@ -17,41 +17,43 @@
     <p class="mt-5">Add one using the green button above to start!</p>
   </div>
   <template v-else>
-    <div class="p-5 rounded-md bg-indigo-200">
-      <p class="text-sm text-gray-600">Available</p>
-      <p class="text-gray-700 font-medium text-4xl">
+    <div class="pb-5">
+      <p class="text-lg font-thin ">Available</p>
+      <p class="text-light-blue-700 text-4xl md:text-3xl">
         ${{ (accountStore.availableBalance.value / 100).toFixed(2) }}
       </p>
     </div>
 
-    <div
-      v-for="group in accountStore.state.accountsByType"
-      :key="group"
-      class="my-5 shadow-sm"
-    >
+    <div class="bg-white px-5 pt-2 mt-5 rounded-lg">
       <div
-        class="flex justify-between items-center font-medium p-3 rounded-md rounded-b-none bg-gray-600"
+        v-for="group in accountStore.state.accountsByType"
+        :key="group"
+        class="my-5"
       >
-        <span class="text-gray-200 font-normal tracking-wider">
-          {{ group.label }}
-        </span>
-        <span class="text-gray-100"
-          >${{ (group.balance / 100).toFixed(2) }}</span
+        <div
+          class="flex items-center justify-between text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
         >
-      </div>
-      <ul class="bg-white rounded-md rounded-tl-none rounded-tr-none">
-        <li v-for="account in group.accounts" :key="account.id">
-          <router-link
-            class="flex justify-between p-3 items-center"
-            :to="`/portfolio/${account.id}`"
+          <span class="font-normal tracking-wider">
+            {{ group.label }}
+          </span>
+          <span>${{ (group.balance / 100).toFixed(2) }}</span>
+        </div>
+        <ul class="flex justify-between pb-3 items-center text-gray-700">
+          <li
+            v-for="account in group.accounts"
+            :key="account.id"
+            class="w-full "
           >
-            <span class="text-gray-700">{{ account.name }}</span>
-            <span class="text-gray-700"
-              >${{ (account.balance / 100).toFixed(2) }}</span
+            <router-link
+              class="flex justify-between py-3 items-center"
+              :to="`/portfolio/${account.id}`"
             >
-          </router-link>
-        </li>
-      </ul>
+              <span>{{ account.name }}</span>
+              <span>${{ (account.balance / 100).toFixed(2) }}</span>
+            </router-link>
+          </li>
+        </ul>
+      </div>
     </div>
   </template>
 
