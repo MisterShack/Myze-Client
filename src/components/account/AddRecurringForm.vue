@@ -10,7 +10,10 @@
 
     <FormField class="flex-1 mb-0">
       <template #label>End Date</template>
-      <DatePicker :selectedDate="state.recurring.end_date"></DatePicker>
+      <DatePicker
+        :selectedDate="state.recurring.end_date"
+        anchor="BR"
+      ></DatePicker>
     </FormField>
   </div>
 

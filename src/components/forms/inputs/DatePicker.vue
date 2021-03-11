@@ -7,7 +7,7 @@
       {{ displayDate }}
     </button>
 
-    <div v-if="state.showCalendar" class="absolute left-0 z-10">
+    <div v-if="state.showCalendar" class="absolute z-10" :class="anchorClass">
       <Calendar
         :allowEmpty="state.required"
         @select-date="selectDate"
@@ -17,8 +17,8 @@
         class="bg-white flex justify-center border border-gray-400 border-t-0 "
       >
         <button
-          v-if="state.allowEmpty"
-          @click="clear()"
+          v-if="!state.required"
+          @click="clear"
           class="flex-1 p-2 bg-gray-200"
         >
           Clear
@@ -41,7 +41,7 @@
 </style>
 
 <script>
-  import { reactive, computed, watch } from "vue";
+  import { computed, reactive, watch } from "vue";
   import dayjs from "dayjs";
   import Calendar from "@/components/forms/inputs/Calendar.vue";
   export default {
@@ -51,6 +51,7 @@
         type: Boolean,
         default: false,
       },
+      anchor: String,
     },
     emits: ["select-date", "clear"],
     components: { Calendar },
@@ -59,6 +60,7 @@
         selectedDate: props.selectedDate,
         showCalendar: false,
         required: props.required,
+        anchor: props.anchor,
       });
 
       watch(
@@ -67,6 +69,26 @@
           state.selectedDate = selectedDate;
         }
       );
+
+      watch(
+        () => props.required,
+        (required) => {
+          state.required = required;
+        }
+      );
+
+      watch(
+        () => props.anchor,
+        (anchor) => (state.anchor = anchor)
+      );
+
+      const anchorClass = computed(() => {
+        if (state.anchor === "BR") {
+          return "right-0";
+        } else if (state.anchor === "BL") {
+          return "left-0";
+        }
+      });
 
       const displayDate = computed(() => {
         if (state.selectedDate === null) {
@@ -95,6 +117,7 @@
 
       function clear() {
         state.selectedDate = null;
+        toggleCalendar();
         context.emit("select-date", null);
         context.emit("clear");
       }
@@ -105,6 +128,7 @@
         toggleCalendar,
         selectDate,
         clear,
+        anchorClass,
       };
     },
   };
