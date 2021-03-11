@@ -13,9 +13,33 @@ export interface NewTransaction {
   category_id?: number;
   date: string;
   description: string;
-  type: string;
+  type: TransactionType;
   amount: number;
   vendor: Vendor;
+}
+
+export interface NewRecurring {
+  id?: number;
+  account_id: number;
+  vendor: Vendor;
+  description: string;
+  amount: number;
+  interval: RecurringInterval;
+  start_date: string;
+  end_date: string;
+  type: string;
+}
+
+export enum RecurringIntervalType {
+  "D",
+  "W",
+  "M",
+  "Y",
+}
+
+export interface RecurringInterval {
+  quantity: number;
+  type: RecurringIntervalType;
 }
 
 export interface Account {
@@ -33,9 +57,26 @@ export interface Transaction {
   readonly category_id?: number;
   readonly date: string;
   readonly description: string;
-  readonly type: string;
+  readonly type: TransactionType;
   readonly amount: number;
   readonly vendor: Vendor;
+}
+
+export enum TransactionType {
+  Debit = "DEBIT",
+  Credit = "CREDIT",
+}
+
+export interface Recurring {
+  id: number;
+  account_id: number;
+  vendor: Vendor;
+  description: string;
+  amount: number;
+  interval: RecurringInterval;
+  start_date: string;
+  end_date: string;
+  type: TransactionType;
 }
 
 export interface Vendor {
