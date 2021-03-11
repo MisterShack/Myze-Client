@@ -36,6 +36,8 @@
       />
     </div>
 
+
+
     <div class="mb-5">
       <label
         for="t_amount"
@@ -84,10 +86,10 @@
     <MyzeButton theme="Success" @click="addTransaction('DEBIT')"
       >Add Debit</MyzeButton
     >
-    <MyzeButton type="Success" @click="addTransaction('CREDIT')"
+    <MyzeButton theme="Success" @click="addTransaction('CREDIT')"
       >Add Credit</MyzeButton
     >
-    <MyzeButton type="Success" @click="save">Save</MyzeButton>
+    <MyzeButton theme="Success" @click="save">Save</MyzeButton>
   </div>
 </template>
 
