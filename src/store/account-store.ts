@@ -1,11 +1,12 @@
 import AccountApi from "@/api/AccountApi.js";
+import RecurringApi from "@/api/RecurringApi";
 import dayjs from "dayjs";
 import {
   createTransaction,
   updateTransaction,
   deleteTransaction,
 } from "@/api/TransactionApi";
-import { createVendor } from "@/store/vendor";
+import { createVendor, addVendor } from "@/store/vendor";
 import { reactive, readonly, computed, ComputedRef } from "vue";
 
 class AccountStore {
@@ -135,7 +136,7 @@ class AccountStore {
     account: Myze.Account,
     transaction: Myze.Transaction
   ) {
-    if (transaction.type === "DEBIT") {
+    if (transaction.type === Myze.TransactionType.Debit) {
       account.balance += transaction.amount;
     } else {
       account.balance -= transaction.amount;
@@ -146,7 +147,7 @@ class AccountStore {
     account: Myze.Account,
     transaction: Myze.Transaction
   ) {
-    if (transaction.type === "DEBIT") {
+    if (transaction.type === Myze.TransactionType.Debit) {
       account.balance -= transaction.amount;
     } else {
       account.balance += transaction.amount;
@@ -159,7 +160,7 @@ class AccountStore {
     const account = this.getAccount(transaction.account_id);
 
     // Update the account balance
-    if (transaction.type === "DEBIT") {
+    if (transaction.type === Myze.TransactionType.Debit) {
       account.balance += transaction.amount;
     } else {
       account.balance -= transaction.amount;
@@ -196,6 +197,32 @@ class AccountStore {
     this.state.accounts[account.id] = account;
 
     return account;
+  }
+
+  async saveRecurring(
+    newRecurring: Myze.NewRecurring
+  ): Promise<Myze.Recurring> {
+    const response = await RecurringApi.createRecurring(newRecurring);
+
+    if (response.data.vendor_id) {
+      newRecurring.vendor = {
+        id: response.data.vendor_id,
+        name: newRecurring.vendor.name,
+      };
+
+      addVendor(newRecurring.vendor);
+    }
+
+    const recurring: Myze.Recurring = {
+      id: response.data.recurring_id,
+      ...newRecurring,
+    };
+
+    this.state.accounts[recurring.account_id].recurring[
+      recurring.id
+    ] = recurring;
+
+    return recurring;
   }
 
   async deleteAccount(accountId: number) {

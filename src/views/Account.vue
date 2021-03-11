@@ -4,7 +4,7 @@
   </div>
   <template v-else>
     <router-link
-      class="flex items-center text-gray-600 cursor-pointer"
+      class="flex items-center text-gray-600 cursor-pointer mb-5"
       to="/portfolio"
     >
       <svg
@@ -58,7 +58,10 @@
         v-if="state.activeNavigation === 'transactions'"
         :account="state.account"
       />
-      <Recurring v-if="state.activeNavigation === 'recurring'" />
+      <Recurring
+        v-if="state.activeNavigation === 'recurring'"
+        :account="state.account"
+      />
 
       <Settings
         v-if="state.activeNavigation === 'settings'"

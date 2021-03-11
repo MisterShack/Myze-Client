@@ -14,34 +14,93 @@
       <h2 class="text-lg tracking-wide mb-3">Recurring</h2>
       <button
         class="bg-green-100 py-2 px-4 text-xs font-semibold text-green-900 border border-green-500 border-opacity-20 hover:border-opacity-100 transition-all duration-300 ease-in-out rounded-md"
+        @click="openRecurringPanel()"
       >
         Add
       </button>
     </div>
     <ul class="my-6">
-      <li class="text-light-blue-700 text-sm">April 30th, 2020</li>
-      <hr class="border-light-blue-700 border-opacity-20 mt-1" />
-      <ul>
-        <li class="py-1 mb-2 flex items-center justify-between text-gray-600">
+      <template v-for="recurring in state.recurring" :key="recurring.id">
+        <li
+          class="py-1 mb-2 flex items-center justify-between text-gray-600 cursor-pointer"
+          @click="openRecurringPanel(recurring.id)"
+        >
           <div>
-            <p>Netflix</p>
-            <p class="text-xs text-gray-400">Every month</p>
+            <p>{{ recurring.vendor.name }}</p>
+            <p class="text-xs text-gray-400">
+              {{ getIntervalText(recurring) }}
+            </p>
           </div>
-          <span class="text-lg">-$13.99</span>
+          <span class="text-lg"
+            >${{ (recurring.amount / 100).toFixed(2) }}</span
+          >
         </li>
-      </ul>
-
-      <li class="text-light-blue-700 text-sm mt-5">May 22nd, 2020</li>
-      <hr class="border-light-blue-700 border-opacity-20 mt-1" />
-      <ul>
-        <li class="py-1 flex items-center justify-between text-gray-600">
-          <div>
-            <p>Payroll</p>
-            <p class="text-xs text-gray-400">Every two weeks</p>
-          </div>
-          <span class="text-lg">$1450.00</span>
-        </li>
-      </ul>
+      </template>
     </ul>
   </div>
+  <Panel
+    :active="state.showRecurringPanel"
+    @close="state.showRecurringPanel = false"
+  >
+    <template #title>Add Recurring</template>
+    <template v-slot="scope">
+      <AddRecurringForm
+        :account="account"
+        :recurringId="state.recurringToEdit"
+        @close="scope.close"
+      />
+    </template>
+  </Panel>
 </template>
+
+<script>
+  import { reactive } from "vue";
+  import dayjs from "dayjs";
+  import Panel from "@/components/Panel.vue";
+  import AddRecurringForm from "@/components/account/AddRecurringForm.vue";
+  export default {
+    props: {
+      account: {
+        required: true,
+      },
+    },
+    components: { Panel, AddRecurringForm },
+    setup(props) {
+      const state = reactive({
+        showRecurringPanel: false,
+        recurring: props.account.recurring,
+        recurringToEdit: null,
+      });
+
+      const recurringTypes = {
+        "1W": "Every week",
+        "2W": "Every two weeks",
+        "1M": "Every month",
+      };
+
+      function openRecurringPanel(recurringId) {
+        state.recurringToEdit = recurringId;
+        state.showRecurringPanel = true;
+      }
+
+      function getIntervalText(recurring) {
+        let interval_text = recurringTypes[recurring.interval];
+
+        if (recurring.start_date === dayjs().format("YYYY-MM-DD")) {
+          interval_text += " starting today";
+        } else if (dayjs(recurring.start_date) > dayjs()) {
+          interval_text +=
+            " starting on " + dayjs(recurring.start_date).format("YYYY-MM-DD");
+        }
+
+        return interval_text;
+      }
+
+      return {
+        state,
+        openRecurringPanel,
+        getIntervalText,
+      };
+    },
+  };
+</script>
