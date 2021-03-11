@@ -9,6 +9,10 @@ function setVendors(vendors) {
   state.vendors = vendors;
 }
 
+function addVendor(vendor) {
+  state.vendors[vendor.id] = vendor;
+}
+
 async function loadVendors() {
   const response = await VendorApi.getVendors();
   setVendors(response.data);
@@ -37,4 +41,4 @@ function getVendors() {
   return state.vendors;
 }
 
-export { getVendors, loadVendors, createVendor };
+export { getVendors, loadVendors, createVendor, addVendor };
