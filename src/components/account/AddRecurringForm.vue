@@ -112,7 +112,7 @@
       FormField,
       SelectMenu,
     },
-    emits: ["close"],
+    emits: ["close", "form-saved"],
     setup(props, { emit }) {
       const state = reactive({
         vendors: getVendors(),
@@ -160,6 +160,7 @@
       // TODO - Move to a service/store file
       async function save() {
         await accountStore.saveRecurring(state.recurring);
+        emit("form-saved");
         emit("close");
       }
 
