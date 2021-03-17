@@ -47,9 +47,18 @@
                   {{ transaction.description }}
                 </p>
               </div>
-              <span class="text-lg"
-                >$ {{ (transaction.amount / 100).toFixed(2) }}</span
-              >
+              <span v-if="transaction.type === 'DEBIT'" class="text-lg">{{
+                new Intl.NumberFormat("en-CA", {
+                  style: "currency",
+                  currency: "CAD",
+                }).format((transaction.amount / 100) * -1)
+              }}</span>
+              <span v-else class="text-lg">{{
+                new Intl.NumberFormat("en-CA", {
+                  style: "currency",
+                  currency: "CAD",
+                }).format(transaction.amount / 100)
+              }}</span>
             </li>
           </ul>
         </li>

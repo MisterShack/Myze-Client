@@ -20,7 +20,12 @@
     <div class="pb-5">
       <p class="text-lg font-thin ">Available</p>
       <p class="text-light-blue-700 text-4xl md:text-3xl">
-        ${{ (accountStore.availableBalance.value / 100).toFixed(2) }}
+        {{
+          new Intl.NumberFormat("en-CA", {
+            style: "currency",
+            currency: "CAD",
+          }).format(accountStore.availableBalance.value / 100)
+        }}
       </p>
     </div>
 
@@ -36,7 +41,14 @@
           <span class="font-normal tracking-wider">
             {{ group.label }}
           </span>
-          <span>${{ (group.balance / 100).toFixed(2) }}</span>
+          <span>
+            {{
+              new Intl.NumberFormat("en-CA", {
+                style: "currency",
+                currency: "CAD",
+              }).format(group.balance / 100)
+            }}</span
+          >
         </div>
         <ul class="flex justify-between pb-3 items-center text-gray-700">
           <li
@@ -49,7 +61,12 @@
               :to="`/portfolio/${account.id}`"
             >
               <span>{{ account.name }}</span>
-              <span>${{ (account.balance / 100).toFixed(2) }}</span>
+              {{
+                new Intl.NumberFormat("en-CA", {
+                  style: "currency",
+                  currency: "CAD",
+                }).format(account.balance / 100)
+              }}
             </router-link>
           </li>
         </ul>

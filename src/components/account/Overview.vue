@@ -79,9 +79,12 @@
                 class="py-1 mb-2 flex items-center justify-between text-gray-600"
               >
                 <span>{{ transaction.vendor.name }}</span>
-                <span class="text-lg"
-                  >${{ (transaction.amount / 100).toFixed(2) }}</span
-                >
+                <span class="text-lg">{{
+                  new Intl.NumberFormat("en-CA", {
+                    style: "currency",
+                    currency: "CAD",
+                  }).format(transaction.amount / 100)
+                }}</span>
               </li>
             </ul>
           </li>
