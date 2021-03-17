@@ -1,0 +1,30 @@
+name: DEPLOY TO PRODUCTION
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [master]
+    
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Starting deploy of Myze Client (Vue.js)
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+      
+      - name: Installing dependencies
+      - run: npm install
+      
+      - name: Building project 
+      - run: npm build
+      
+      - name: Deploying project to DigitalOcean
+      - uses: appleboy/scp-action@master
+        env: 
+         HOST: ${{secrets.SSH_HOST}}
+         KEY: ${{secrets.SSH_KEY}}
+         USERNAME: ${{secrets.SSH_USER}}
+        with:
+          source: "./dist"
+          target: "/var/www/myze-client"
