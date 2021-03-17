@@ -59,6 +59,13 @@
           class="ml-8 font-medium text-gray-600 hover:text-gray-900 transition duration-150 ease-in-out"
           >Contact</a
         >
+        <router-link
+          v-if="state.user !== null"
+          class="ml-8 font-medium text-blue-600 hover:text-blue-900 transition duration-150 ease-in-out"
+          to="/logout"
+        >
+          Logout
+        </router-link>
       </div>
     </nav>
   </div>
