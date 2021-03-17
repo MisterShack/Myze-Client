@@ -1,15 +1,17 @@
 import { watch } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
-import Home from "@/views/Home.vue";
-import Portfolio from "@/views/Portfolio.vue";
-import Account from "@/views/Account.vue";
-import Login from "@/views/auth/Login.vue";
-import Signup from "@/views/auth/Signup.vue";
 import { user, initialized } from "@/auth/index.js";
+
+const Home = () => import("@/views/Home.vue");
+const Login = () => import("@/views/auth/Login.vue");
+const Signup = () => import("@/views/auth/Signup.vue");
+const Logout = () => import("@/views/auth/Logout.vue");
+const Portfolio = () => import("@/views/Portfolio.vue");
+const Account = () => import("@/views/Account.vue");
 
 const routes = [
   {
-    path: "/",
+    path: "/home",
     name: "Home",
     component: Home,
     meta: {
@@ -18,11 +20,12 @@ const routes = [
     },
   },
   {
-    path: "/login",
+    path: "/",
+    alias: "/login",
     name: "Login",
     component: Login,
     meta: {
-      public: true,
+      public: "strict",
     },
   },
   {
@@ -30,8 +33,13 @@ const routes = [
     name: "Signup",
     component: Signup,
     meta: {
-      public: true,
+      public: "strict",
     },
+  },
+  {
+    path: "/logout",
+    name: "Logout",
+    component: Logout,
   },
   {
     path: "/portfolio",
@@ -50,23 +58,32 @@ const router = createRouter({
   routes,
 });
 
+function validateRoutes(to, next, user) {
+  const isPublicRoute = to.matched.some((record) => record.meta.public);
+  const isOnlyPublicRoute = to.matched.some(
+    (record) => record.meta.public === "strict"
+  );
+  const userIsAuthenticated = user.value;
+
+  // If not a public route and the user isn't authenticated, redirect to login
+  if (!isPublicRoute && !userIsAuthenticated) {
+    return next("/login");
+  } else if (userIsAuthenticated && isOnlyPublicRoute) {
+    return next("/portfolio");
+  }
+
+  return next();
+}
+
 router.beforeEach((to, _, next) => {
   if (initialized.value) {
-    if (!to.matched.some((record) => record.meta.public) && !user.value) {
-      return next("/login");
-    }
-
-    next();
+    validateRoutes(to, next, user);
   } else {
     watch(
       () => initialized.value,
       (newVal) => {
         if (newVal) {
-          if (!to.matched.some((record) => record.meta.public) && !user.value) {
-            return next("/login");
-          }
-
-          next();
+          validateRoutes(to, next, user);
         }
       }
     );
