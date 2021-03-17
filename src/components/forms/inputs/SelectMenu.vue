@@ -2,7 +2,7 @@
   <div class="relative">
     <span class="inline-block w-full rounded-md shadow-sm">
       <button
-        @click="toggleOptions()"
+        @click="toggleOptions"
         type="button"
         aria-expanded="true"
         aria-labelledby="listbox-label"
@@ -83,7 +83,6 @@
         <li
           v-for="(value, key) in state.options"
           :key="key"
-          id="listbox-item-0"
           role="option"
           class="cursor-default select-none relative py-2 pl-3 pr-9 text-gray-900 hover:text-white hover:bg-indigo-600"
           @click="selectOption(key)"
@@ -91,7 +90,7 @@
           <div class="flex items-center space-x-3">
             <span
               :class="
-                key === state.selectedKey ? 'font-semibold' : 'font-normal'
+                key == state.selectedKey ? 'font-semibold' : 'font-normal'
               "
               class="font-normal block truncate"
             >
@@ -118,7 +117,7 @@
 </template>
 
 <script>
-  import { reactive } from "vue";
+  import { reactive, watch } from "vue";
 
   export default {
     props: {
@@ -129,10 +128,9 @@
       optional: {
         type: Boolean,
         default: false,
-        required: false,
       },
       selectedKey: {
-        type: [Number, String, null],
+        type: String,
       },
     },
     emits: ["select"],
@@ -142,6 +140,16 @@
         selectedKey: props.selectedKey,
         showOptions: false,
       });
+
+      watch(
+        () => props.options,
+        (options) => (state.options = options)
+      );
+
+      watch(
+        () => props.selectedKey,
+        (selectedKey) => (state.selectedKey = selectedKey)
+      );
 
       function toggleOptions() {
         state.showOptions = !state.showOptions;

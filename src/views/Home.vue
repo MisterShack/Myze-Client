@@ -75,18 +75,18 @@
                 class="ml-8 font-medium text-gray-500 hover:text-gray-900 transition duration-150 ease-in-out"
                 >Contact</a
               >
-              <a
-                v-if="auth.isAuthenticated.value"
-                href="/portfolio"
+              <router-link
+                v-if="state.user !== null"
                 class="ml-8 font-medium text-blue-600 hover:text-blue-900 transition duration-150 ease-in-out"
-                >Go To App</a
+                to="portfolio"
               >
-              <a
+                Go To App
+              </router-link>
+              <router-link
                 v-else
-                href="#"
+                to="login"
                 class="ml-8 font-medium text-blue-600 hover:text-blue-900 transition duration-150 ease-in-out"
-                @click="auth.loginWithRedirect"
-                >Log in</a
+                >Log in</router-link
               >
             </div>
           </nav>
@@ -166,7 +166,6 @@
               </div>
               <div>
                 <a
-                  v-if="auth.isAuthenticated.value"
                   href="/portfolio"
                   class="block w-full px-5 py-3 text-center font-medium text-blue-600 bg-gray-50 hover:bg-gray-100 hover:text-blue-700 focus:outline-none focus:bg-gray-100 focus:text-blue-700 transition duration-150 ease-in-out"
                   role="menuitem"
@@ -174,7 +173,6 @@
                   Go To App
                 </a>
                 <a
-                  v-else
                   href="#"
                   class="block w-full px-5 py-3 text-center font-medium text-blue-600 bg-gray-50 hover:bg-gray-100 hover:text-blue-700 focus:outline-none focus:bg-gray-100 focus:text-blue-700 transition duration-150 ease-in-out"
                   role="menuitem"
@@ -406,13 +404,14 @@
 
 <script>
   import { reactive } from "vue";
+  import { user } from "@/auth/index.js";
 
   export default {
     name: "Home",
-    inject: ["auth"],
     setup() {
       const state = reactive({
         showMobileMenu: false,
+        user: user,
       });
 
       function toggleMobileMenu() {

@@ -1,97 +1,111 @@
 <template>
-  <div class="md:w-4/5 w-11/12 mx-auto max-w-4xl relative">
-    <div class="flex py-5 justify-between items-center">
-      <p class="text-3xl text-gray-600 font-light tracking-wider ">
-        Portfolio
-      </p>
-      <myze-button theme="Success" @click="showAddAccountPanel()"
-        >Account</myze-button
-      >
-    </div>
-
-    <div class="p-5 rounded-md bg-indigo-200">
-      <p class="text-sm text-gray-600">Available</p>
-      <p class="text-gray-700 font-medium text-4xl">
-        {{ state.availableBalance }}
-      </p>
-    </div>
-
-    <div
-      v-for="(group, accountType) in state.accountsByType"
-      :key="group"
-      class="my-5 shadow-sm"
+  <div class="flex py-5 justify-between items-center">
+    <p class="text-3xl text-gray-600 font-light tracking-wider ">
+      Portfolio
+    </p>
+    <myze-button theme="Success" @click="showAddAccountPanel()"
+      >Account</myze-button
     >
-      <div
-        class="flex justify-between items-center font-medium p-3 rounded-md rounded-b-none bg-gray-600"
-      >
-        <span class="text-gray-200 font-normal tracking-wider">
-          {{ accountTypes[accountType] }}
-        </span>
-        <span class="text-gray-100">{{ group.formattedBalance }}</span>
-      </div>
-      <ul class="bg-white rounded-md rounded-tl-none rounded-tr-none">
-        <li v-for="account in group.accounts" :key="account.id">
-          <a
-            class="flex justify-between p-3 items-center"
-            :href="`/portfolio/${account.id}`"
-          >
-            <span class="text-gray-700">{{ account.name }}</span>
-            <span class="text-gray-700">{{ account.formattedBalance }}</span>
-          </a>
-        </li>
-      </ul>
-    </div>
   </div>
 
-  <AddAccountPanel
-    :show="state.showAddAccountPanel"
+  <p v-if="state.loading">Loading...</p>
+  <div
+    v-else-if="Object.keys(accountStore.state.accountsByType).length === 0"
+    class="mt-20 text-center text-xl text-gray-600"
+  >
+    <p class="text-2xl font-bold">No accounts found!</p>
+    <p class="mt-5">Add one using the green button above to start!</p>
+  </div>
+  <template v-else>
+    <div class="pb-5">
+      <p class="text-lg font-thin ">Available</p>
+      <p class="text-light-blue-700 text-4xl md:text-3xl">
+        {{
+          new Intl.NumberFormat("en-CA", {
+            style: "currency",
+            currency: "CAD",
+          }).format(accountStore.availableBalance.value / 100)
+        }}
+      </p>
+    </div>
+
+    <div class="bg-white px-5 pt-2 mt-5 rounded-lg">
+      <div
+        v-for="group in accountStore.state.accountsByType"
+        :key="group"
+        class="my-5"
+      >
+        <div
+          class="flex items-center justify-between text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
+        >
+          <span class="font-normal tracking-wider">
+            {{ group.label }}
+          </span>
+          <span>
+            {{
+              new Intl.NumberFormat("en-CA", {
+                style: "currency",
+                currency: "CAD",
+              }).format(group.balance / 100)
+            }}</span
+          >
+        </div>
+        <ul class="flex justify-between pb-3 items-center text-gray-700">
+          <li
+            v-for="account in group.accounts"
+            :key="account.id"
+            class="w-full "
+          >
+            <router-link
+              class="flex justify-between py-3 items-center"
+              :to="`/portfolio/${account.id}`"
+            >
+              <span>{{ account.name }}</span>
+              {{
+                new Intl.NumberFormat("en-CA", {
+                  style: "currency",
+                  currency: "CAD",
+                }).format(account.balance / 100)
+              }}
+            </router-link>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </template>
+
+  <Panel
+    :active="state.showAddAccountPanel"
     @close="state.showAddAccountPanel = false"
-  />
+  >
+    <template #title>Add Account</template>
+    <AddAccountPanel />
+  </Panel>
 </template>
 
 <script>
   import { reactive } from "vue";
   import MyzeButton from "../components/MyzeButton.vue";
+  import Panel from "@/components/Panel.vue";
   import AddAccountPanel from "@/components/account/AddAccountPanel.vue";
+  import { accountStore } from "@/store/account-store";
   export default {
-    components: { MyzeButton, AddAccountPanel },
+    components: { MyzeButton, AddAccountPanel, Panel },
     setup() {
       const state = reactive({
+        loading: true,
         showAddAccountPanel: false,
-        availableBalance: "$50.00",
-        accountsByType: {
-          CHEQUING: {
-            balance: 46789,
-            formattedBalance: "$467.89",
-            accounts: [
-              {
-                id: 784,
-                name: "General Chequing",
-                balance: 46789,
-                formattedBalance: "$467.89",
-              },
-              {
-                id: 784,
-                name: "General Chequing",
-                balance: 4689,
-                formattedBalance: "$46.89",
-              },
-            ],
-          },
-        },
       });
-
-      const accountTypes = {
-        CHEQUING: "Chequing",
-      };
 
       function showAddAccountPanel() {
         state.showAddAccountPanel = true;
       }
 
+      accountStore.loadAccounts().then(() => (state.loading = false));
+
       return {
         state,
-        accountTypes,
+        accountStore,
         showAddAccountPanel,
       };
     },

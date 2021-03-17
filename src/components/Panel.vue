@@ -48,7 +48,7 @@
             </header>
 
             <div class="relative flex-1 px-4 sm:px-6">
-              <slot />
+              <slot :close="close" />
             </div>
           </div>
         </div>
@@ -61,25 +61,26 @@
   import { computed, reactive, watch } from "vue";
   export default {
     props: {
-      show: {
+      active: {
         type: Boolean,
         required: true,
       },
     },
+    emits: ["close"],
     setup(props, context) {
       const state = reactive({
-        show: false,
         visible: false,
+        show: false,
       });
 
       watch(
-        () => props.show,
-        (show) => {
-          if (show) {
+        () => props.active,
+        (active) => {
+          if (active) {
             state.visible = true;
           }
 
-          state.show = show;
+          state.show = active;
         }
       );
 
