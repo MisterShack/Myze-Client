@@ -46,6 +46,7 @@ export interface Account {
   readonly id: number;
   readonly name: string;
   balance: number;
+  readonly owner: Boolean;
   readonly type: string;
   readonly transactions: { [key: string]: { [key: number]: Transaction } };
   readonly recurring: Array<object>;
