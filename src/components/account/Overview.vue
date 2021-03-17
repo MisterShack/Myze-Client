@@ -17,40 +17,40 @@
     <div class="bg-white h-auto lg:flex-1 shadow-md rounded-lg p-6 pb-0">
       <h2 class="text-lg tracking-wide mb-3">Upcoming</h2>
       <p
-        v-if="state.account.recurring.length === 0"
+        v-if="Object.values(state.futureTransactions).length === 0"
         class="text-center pt-5 pb-10 text-gray-500"
       >
         No upcoming transactions!
       </p>
       <ul v-else class="my-6">
-        <li
-          class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
+        <template
+          v-for="(transactions, date) in state.futureTransactions"
+          :key="date"
         >
-          April 30th, 2020
-        </li>
-        <li>
-          <ul>
-            <li
-              class="py-1 mb-2 flex items-center justify-between text-gray-600"
-            >
-              <span>Netflix</span>
-              <span class="text-lg">$13.99</span>
-            </li>
-          </ul>
-        </li>
-        <li
-          class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
-        >
-          May 22nd, 2020
-        </li>
-        <li>
-          <ul>
-            <li class="py-1 flex items-center justify-between text-gray-600">
-              <span>Old Navy</span>
-              <span class="text-lg">$56.98</span>
-            </li>
-          </ul>
-        </li>
+          <li
+            class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
+          >
+            {{ date }}
+          </li>
+          <li
+            v-for="(transaction, key) in transactions"
+            :key="`${date}_${key}`"
+          >
+            <ul>
+              <li
+                class="py-1 mb-2 flex items-center justify-between text-gray-600"
+              >
+                <span>{{ transaction.vendor.name }}</span>
+                <span class="text-lg">{{
+                  new Intl.NumberFormat("en-CA", {
+                    style: "currency",
+                    currency: "CAD",
+                  }).format(transaction.amount / 100)
+                }}</span>
+              </li>
+            </ul>
+          </li>
+        </template>
       </ul>
     </div>
     <div class="bg-white h-auto lg:flex-1 shadow-md rounded-lg p-6 pb-0">
@@ -97,6 +97,9 @@
 <script>
   import { computed, reactive, watch } from "vue";
 
+  import dayjs from "dayjs";
+  import RecurringService from "@/services/RecurringService.ts";
+
   export default {
     props: {
       account: {
@@ -111,11 +114,25 @@
     setup(props) {
       const state = reactive({
         account: props.account,
+        futureTransactions: RecurringService.generateFutureTransactions(
+          props.account.id,
+          dayjs()
+            .add(2, "week")
+            .format("YYYY-MM-DD")
+        ),
       });
 
       watch(
         () => props.account,
-        (account) => (state.account = account)
+        (account) => {
+          state.account = account;
+          state.futureTransactions = RecurringService.generateFutureTransactions(
+            props.account.id,
+            dayjs()
+              .add(2, "week")
+              .format("YYYY-MM-DD")
+          );
+        }
       );
 
       const sortedTransactionDates = computed(() =>
