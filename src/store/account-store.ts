@@ -136,7 +136,7 @@ class AccountStore {
     account: Myze.Account,
     transaction: Myze.Transaction
   ) {
-    if (transaction.type === Myze.TransactionType.Debit) {
+    if (transaction.type === "DEBIT") {
       account.balance += transaction.amount;
     } else {
       account.balance -= transaction.amount;
@@ -147,7 +147,7 @@ class AccountStore {
     account: Myze.Account,
     transaction: Myze.Transaction
   ) {
-    if (transaction.type === Myze.TransactionType.Debit) {
+    if (transaction.type === "DEBIT") {
       account.balance -= transaction.amount;
     } else {
       account.balance += transaction.amount;
@@ -160,7 +160,7 @@ class AccountStore {
     const account = this.getAccount(transaction.account_id);
 
     // Update the account balance
-    if (transaction.type === Myze.TransactionType.Debit) {
+    if (transaction.type === "DEBIT") {
       account.balance += transaction.amount;
     } else {
       account.balance -= transaction.amount;
