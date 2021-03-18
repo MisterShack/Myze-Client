@@ -36,8 +36,6 @@
       />
     </div>
 
-
-
     <div class="mb-5">
       <label
         for="t_amount"
@@ -169,10 +167,12 @@
       }
 
       async function removeTransaction(transactionIdx) {
-        // Remove from DB, and local store
-        await accountStore.removeTransaction(
-          state.transactions[transactionIdx]
-        );
+        if (state.transactions[transactionIdx].account_id) {
+          // Remove from DB, and local store
+          await accountStore.removeTransaction(
+            state.transactions[transactionIdx]
+          );
+        }
 
         // Remove from this panel list
         state.transactions.splice(transactionIdx, 1);
