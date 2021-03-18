@@ -60,7 +60,7 @@
           >Contact</a
         >
         <router-link
-          v-if="state.user !== null"
+          v-if="user !== null"
           class="ml-8 font-medium text-blue-600 hover:text-blue-900 transition duration-150 ease-in-out"
           to="/logout"
         >
@@ -73,6 +73,8 @@
 
 <script>
   import { reactive } from "vue";
+  import { user } from "@/auth/index.js";
+
   export default {
     setup() {
       const state = reactive({
@@ -85,6 +87,7 @@
 
       return {
         state,
+        user,
         toggleMobileMenu,
       };
     },
