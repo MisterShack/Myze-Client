@@ -1,10 +1,13 @@
 <template>
-  <div class="flex py-5 justify-between items-center">
-    <p class="text-3xl text-gray-600 font-light tracking-wider ">
-      Portfolio
-    </p>
-    <myze-button theme="Success" @click="showAddAccountPanel()"
-      >Account</myze-button
+  <div class="flex mb-5 justify-between items-center">
+    <PageHeader>Accounts</PageHeader>
+    <myze-button
+      v-if="Object.keys(accountStore.state.accountsByType).length > 0"
+      theme="Success"
+      icon="Add"
+      @click="showAddAccountPanel()"
+    >
+      Account</myze-button
     >
   </div>
 
@@ -14,29 +17,29 @@
     class="mt-20 text-center text-xl text-gray-600"
   >
     <p class="text-2xl font-bold">No accounts found!</p>
-    <p class="mt-5">Add one using the green button above to start!</p>
+    <p class="mt-5">
+      Add one using the green button below!
+    </p>
+    <p class="mt-5">
+      <myze-button
+        class="mx-auto"
+        theme="Success"
+        icon="Add"
+        @click="showAddAccountPanel()"
+      >
+        Account</myze-button
+      >
+    </p>
   </div>
   <template v-else>
-    <div class="pb-5">
-      <p class="text-lg font-thin ">Available</p>
-      <p class="text-light-blue-700 text-4xl md:text-3xl">
-        {{
-          new Intl.NumberFormat("en-CA", {
-            style: "currency",
-            currency: "CAD",
-          }).format(accountStore.availableBalance.value / 100)
-        }}
-      </p>
-    </div>
-
-    <div class="bg-white px-5 pt-2 mt-5 rounded-lg">
+    <div class="grid grid-cols-1 gap-2 md:grid-cols-2 md:auto-rows-auto">
       <div
+        class="bg-white px-5 rounded-lg"
         v-for="group in accountStore.state.accountsByType"
         :key="group"
-        class="my-5"
       >
         <div
-          class="flex items-center justify-between text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
+          class="flex items-center justify-between text-light-blue-700  border-b border-light-blue-700 pb-1 border-opacity-30 pt-3"
         >
           <span class="font-normal tracking-wider">
             {{ group.label }}
@@ -50,7 +53,7 @@
             }}</span
           >
         </div>
-        <ul class="flex justify-between pb-3 items-center text-gray-700">
+        <ul>
           <li
             v-for="account in group.accounts"
             :key="account.id"
@@ -58,14 +61,14 @@
           >
             <router-link
               class="flex justify-between py-3 items-center"
-              :to="`/portfolio/${account.id}`"
+              :to="`/accounts/${account._id.toString()}`"
             >
               <span>{{ account.name }}</span>
               {{
                 new Intl.NumberFormat("en-CA", {
                   style: "currency",
                   currency: "CAD",
-                }).format(account.balance / 100)
+                }).format(account.current_balance / 100)
               }}
             </router-link>
           </li>
@@ -74,23 +77,24 @@
     </div>
   </template>
 
-  <Panel
-    :active="state.showAddAccountPanel"
-    @close="state.showAddAccountPanel = false"
-  >
+  <Panel v-model:active="state.showAddAccountPanel">
     <template #title>Add Account</template>
     <AddAccountPanel />
   </Panel>
 </template>
 
-<script>
+<script lang="ts">
+  import { defineComponent } from "vue";
   import { reactive } from "vue";
+  import PageHeader from "@/components/PageHeader.vue";
   import MyzeButton from "../components/MyzeButton.vue";
   import Panel from "@/components/Panel.vue";
   import AddAccountPanel from "@/components/account/AddAccountPanel.vue";
   import { accountStore } from "@/store/account-store";
-  export default {
-    components: { MyzeButton, AddAccountPanel, Panel },
+
+  export default defineComponent({
+    components: { MyzeButton, AddAccountPanel, Panel, PageHeader },
+
     setup() {
       const state = reactive({
         loading: true,
@@ -109,5 +113,5 @@
         showAddAccountPanel,
       };
     },
-  };
+  });
 </script>

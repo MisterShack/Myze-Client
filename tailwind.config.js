@@ -1,4 +1,4 @@
-const colors = require('tailwindcss/colors');
+const colors = require("tailwindcss/colors");
 
 module.exports = {
   purge: [],
@@ -6,13 +6,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-          'light-blue': colors.lightBlue,
-          cyan: colors.cyan,
+        "light-blue": colors.lightBlue,
+        cyan: colors.cyan,
       },
-  },
+    },
   },
   variants: {
-    extend: {},
+    extend: {
+      animation: ["hover", "focus"],
+    },
   },
   plugins: [],
-}
+};

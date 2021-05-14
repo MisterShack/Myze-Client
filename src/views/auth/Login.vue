@@ -97,9 +97,9 @@
 </template>
 
 <script lang="ts">
-  import { watch, defineComponent, reactive } from "vue";
+  import { defineComponent, reactive } from "vue";
   import { useRouter } from "vue-router";
-  import { user, auth } from "@/auth";
+  import { realm } from "@/realm";
   export default defineComponent({
     setup() {
       const state = reactive({
@@ -111,32 +111,9 @@
       const router = useRouter();
 
       async function login() {
-        state.errorMessage = "";
-
-        auth
-          .signInWithEmailAndPassword(state.email, state.password)
-          .then((res) => (user.value = res.user))
-          .catch((err) => {
-            console.log(err);
-            if (err.code === "auth/user-not-found") {
-              state.errorMessage = "User not found";
-            } else if (err.code === "auth/wrong-password") {
-              state.errorMessage = "Invalid password";
-            } else if (err.code === "auth/too-many-requests") {
-              state.errorMessage =
-                "Your account has been locked from too many requests. Please try again in a few minutes";
-            }
-          });
+        await realm.loginWithEmailAndPassword(state.email, state.password);
+        router.push("/overview");
       }
-
-      watch(
-        () => user.value,
-        (newUser) => {
-          if (newUser) {
-            router.push("/portfolio");
-          }
-        }
-      );
 
       return {
         state,

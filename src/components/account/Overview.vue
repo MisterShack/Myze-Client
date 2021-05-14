@@ -75,7 +75,7 @@
             <ul class="mb-5">
               <li
                 v-for="transaction in transactions"
-                :key="transaction.id"
+                :key="transaction._id.toString()"
                 class="py-1 mb-2 flex items-center justify-between text-gray-600"
               >
                 <span>{{ transaction.vendor.name }}</span>
@@ -115,9 +115,9 @@
       const state = reactive({
         account: props.account,
         futureTransactions: RecurringService.generateFutureTransactions(
-          props.account.id,
+          props.account._id.toString(),
           dayjs()
-            .add(2, "week")
+            .add(4, "week")
             .format("YYYY-MM-DD")
         ),
       });
@@ -127,7 +127,7 @@
         (account) => {
           state.account = account;
           state.futureTransactions = RecurringService.generateFutureTransactions(
-            props.account.id,
+            props.account._id.toString(),
             dayjs()
               .add(2, "week")
               .format("YYYY-MM-DD")
@@ -135,46 +135,22 @@
         }
       );
 
-      const sortedTransactionDates = computed(() =>
-        Object.keys(props.account.transactions).sort(
-          (a, b) => new Date(b) - new Date(a)
-        )
-      );
-
       const latestTransactions = computed(() => {
         let latestTransactions = {};
-        let amountRemaining = 5;
+        let numberOfTransactions = 5;
 
-        for (
-          let i = 0;
-          i < sortedTransactionDates.value.length && amountRemaining > 0;
-          i++
-        ) {
-          let date = sortedTransactionDates.value[i];
+        let transactions = Object.values(props.account.transactions).slice(
+          0,
+          numberOfTransactions
+        );
 
-          let transactionsForDate = state.account.transactions[date];
-
-          // If there's enough room for all the transaction in this day, let's add them all
-          if (transactionsForDate.length <= amountRemaining) {
-            latestTransactions[date] = transactionsForDate;
-            count -= transactionsForDate.length;
-          } else {
-            latestTransactions[date] = {};
-
-            let transactions = Object.values(transactionsForDate);
-
-            for (
-              let j = 0;
-              j < transactions.length && amountRemaining > 0;
-              j++
-            ) {
-              let transaction = transactions[j];
-
-              latestTransactions[date][transaction.id] = transaction;
-              amountRemaining--;
-            }
+        transactions.forEach((t) => {
+          if (!latestTransactions[t.date]) {
+            latestTransactions[t.date] = {};
           }
-        }
+
+          latestTransactions[t.date][t._id.toString()] = t;
+        });
 
         return latestTransactions;
       });

@@ -90,11 +90,11 @@
 </template>
 
 <script>
-  import { watch, defineComponent, reactive } from "vue";
-  import { user, auth } from "@/auth";
+  import { defineComponent, reactive } from "vue";
+  import { app, loginWithEmailAndPassword } from "@/realm";
   import { useRouter } from "vue-router";
   export default defineComponent({
-    setup(props) {
+    setup() {
       const state = reactive({
         email: "",
         password: "",
@@ -102,26 +102,13 @@
 
       const router = useRouter();
 
-      watch(
-        () => user.value,
-        (newUser) => {
-          if (newUser) {
-            router.push("/portfolio");
-          }
-        }
-      );
-
       async function signup() {
         if (state.email == "" || state.password == "") return;
 
-        const creds = await auth.createUserWithEmailAndPassword(
-          state.email,
-          state.password
-        );
+        await app.emailPasswordAuth.registerUser(state.email, state.password);
+        await loginWithEmailAndPassword(state.email, state.password);
 
-        if (!creds.user) throw Error("Signup failed");
-
-        user.value = creds.user;
+        router.push("/overview");
       }
 
       return {

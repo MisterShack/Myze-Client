@@ -1,15 +1,28 @@
 <template>
-  <main class="min-h-screen bg-gray-100">
-    <div class="max-w-6xl w-4/5 mx-auto ">
-      <Navbar />
-      <slot />
+  <main class="min-h-screen max-w-7xl">
+    <div class="pt-10 px-10 md:pl-28">
+      <Sidebar v-show="user !== null" class="hidden md:block" />
+      <div>
+        <slot />
+      </div>
     </div>
+    <BottomNavbar v-show="user !== null" class="md:hidden" />
   </main>
 </template>
 
 <script>
-  import Navbar from "@/components/Navbar.vue";
+  import { computed } from "vue";
+  import Sidebar from "@/components/Sidebar.vue";
+  import BottomNavbar from "@/components/BottomNavbar.vue";
+  import { realm } from "@/realm";
+
   export default {
-    components: { Navbar },
+    components: { BottomNavbar, Sidebar },
+
+    setup() {
+      const user = computed(() => realm.currentUser.value);
+
+      return { user };
+    },
   };
 </script>

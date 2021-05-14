@@ -28,8 +28,11 @@
       class="block w-full p-2 pl-6 md:text-sm sm:leading-5 bg-white border border-gray-300 rounded-md"
       type="number"
       step=".01"
-      :value="state.newAccount.balance / 100"
-      @input="state.newAccount.balance = Math.max($event.target.value, 0) * 100"
+      :value="state.newAccount.starting_balance / 100"
+      @input="
+        state.newAccount.starting_balance =
+          Math.max($event.target.value, 0) * 100
+      "
     />
   </FormField>
 
@@ -52,7 +55,7 @@
       const state = reactive({
         newAccount: {
           name: "",
-          balance: 0,
+          starting_balance: 0,
           type: null,
         },
       });
@@ -78,7 +81,7 @@
       async function addAccount() {
         // Create the account using the API and redirect to the account page
         const account = await accountStore.createAccount(state.newAccount);
-        router.push(`/portfolio/${account.id}`);
+        router.push(`/accounts/${account._id.toString()}`);
       }
 
       return {

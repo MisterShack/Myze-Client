@@ -1,104 +1,118 @@
 <template>
-  <div
-    :class="state.visible ? 'visible' : 'invisible'"
-    class="fixed inset-0 overflow-hidden"
-  >
-    <div class="absolute inset-0 overflow-hidden">
-      <div
-        @click="close"
-        class="absolute inset-0 bg-gray-800 transition ease-in-out duration-500"
-        :class="state.show ? 'bg-opacity-75' : 'bg-opacity-0'"
-      ></div>
-      <section class="absolute inset-y-0 right-0 pl-10 max-w-full flex">
-        <div
-          class="relative w-screen max-w-md transform transition ease-in-out duration-500 sm:duration-700"
-          :class="state.show ? 'translate-x-0' : 'translate-x-full'"
+  <TransitionRoot as="template" :show="open">
+    <Dialog
+      as="div"
+      static
+      class="fixed inset-0 overflow-hidden"
+      @close="close"
+      :open="open"
+    >
+      <div class="absolute inset-0 overflow-hidden">
+        <TransitionChild
+          as="template"
+          enter="ease-in-out duration-500"
+          enter-from="opacity-0"
+          enter-to="opacity-100"
+          leave="ease-in-out duration-500"
+          leave-from="opacity-100"
+          leave-to="opacity-0"
         >
-          <div
-            class="absolute top-0 left-0 -ml-8 pt-4 pr-2 flex sm:-ml-10 sm:pr-4 transition ease-in-out duration-500"
-            :class="state.show ? 'opacity-100' : 'opacity-0'"
+          <DialogOverlay
+            class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          />
+        </TransitionChild>
+        <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex">
+          <TransitionChild
+            as="template"
+            enter="transform transition ease-in-out duration-500 sm:duration-700"
+            enter-from="translate-x-full"
+            enter-to="translate-x-0"
+            leave="transform transition ease-in-out duration-500 sm:duration-700"
+            leave-from="translate-x-0"
+            leave-to="translate-x-full"
           >
-            <button
-              @click="close"
-              aria-label="Close panel"
-              class="text-gray-300 hover:text-white"
-            >
-              <svg
-                class="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            <div class="relative w-screen max-w-md">
+              <TransitionChild
+                as="template"
+                enter="ease-in-out duration-500"
+                enter-from="opacity-0"
+                enter-to="opacity-100"
+                leave="ease-in-out duration-500"
+                leave-from="opacity-100"
+                leave-to="opacity-0"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-          <div
-            class="h-full flex flex-col space-y-6 py-6 bg-white shadow-xl overflow-y-scroll"
-          >
-            <header v-if="titleExists" class="px-4 sm:px-6">
-              <h2 class="text-lg leading-7 font-medium text-gray-900">
-                <slot name="title" />
-              </h2>
-            </header>
-
-            <div class="relative flex-1 px-4 sm:px-6">
-              <slot :close="close" />
+                <div
+                  class="absolute top-0 left-0 -ml-8 pt-4 pr-2 flex sm:-ml-10 sm:pr-4"
+                >
+                  <button
+                    class="rounded-md text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-white"
+                    @click="close"
+                  >
+                    <span class="sr-only">Close panel</span>
+                    <XIcon class="h-6 w-6" aria-hidden="true" />
+                  </button>
+                </div>
+              </TransitionChild>
+              <div
+                class="h-full flex flex-col py-6 bg-white shadow-xl overflow-y-scroll"
+              >
+                <div class="px-4 sm:px-6">
+                  <DialogTitle class="text-lg font-medium text-gray-900">
+                    <slot name="title" />
+                  </DialogTitle>
+                </div>
+                <div class="mt-6 relative flex-1 px-4 sm:px-6">
+                  <slot :close="close" />
+                </div>
+              </div>
             </div>
-          </div>
+          </TransitionChild>
         </div>
-      </section>
-    </div>
-  </div>
+      </div>
+    </Dialog>
+  </TransitionRoot>
 </template>
 
 <script>
-  import { computed, reactive, watch } from "vue";
+  import { watch, ref } from "vue";
+  import {
+    Dialog,
+    DialogOverlay,
+    DialogTitle,
+    TransitionChild,
+    TransitionRoot,
+  } from "@headlessui/vue";
+  import { XIcon } from "@heroicons/vue/solid/esm";
+
   export default {
-    props: {
-      active: {
-        type: Boolean,
-        required: true,
-      },
+    components: {
+      Dialog,
+      DialogOverlay,
+      DialogTitle,
+      TransitionChild,
+      TransitionRoot,
+      XIcon,
     },
-    emits: ["close"],
-    setup(props, context) {
-      const state = reactive({
-        visible: false,
-        show: false,
-      });
+    props: {
+      active: Boolean,
+    },
+    setup(props, { emit }) {
+      let open = ref(props.active);
+
+      function close() {
+        open.value = false;
+        emit("update:active", open.value);
+      }
 
       watch(
         () => props.active,
         (active) => {
-          if (active) {
-            state.visible = true;
-          }
-
-          state.show = active;
+          open.value = active;
         }
       );
 
-      function close() {
-        state.show = false;
-        setTimeout(() => {
-          state.visible = false;
-          context.emit("close");
-        }, 500);
-      }
-
-      const titleExists = computed(() => {
-        return typeof context.slots.title === "function";
-      });
-
       return {
-        state,
-        titleExists,
+        open,
         close,
       };
     },

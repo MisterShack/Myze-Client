@@ -1,13 +1,7 @@
 import AccountApi from "@/api/AccountApi.js";
 import RecurringApi from "@/api/RecurringApi";
-import dayjs from "dayjs";
-import {
-  createTransaction,
-  updateTransaction,
-  deleteTransaction,
-} from "@/api/TransactionApi";
-import { createVendor, addVendor } from "@/store/vendor";
 import { reactive, readonly, computed, ComputedRef } from "vue";
+import { realm } from "@/realm";
 
 class AccountStore {
   state: Myze.AccountStoreState;
@@ -51,7 +45,9 @@ class AccountStore {
             };
           }
 
-          _accountsByType[account.type].balance += parseInt(account.balance);
+          _accountsByType[account.type].balance += parseInt(
+            account.current_balance
+          );
           _accountsByType[account.type].accounts.push(account);
         }
       }
@@ -68,7 +64,7 @@ class AccountStore {
       ) {
         for (let idx in this.state.accounts) {
           let account = this.state.accounts[idx];
-          availableBalance += parseInt(account.balance);
+          availableBalance += parseInt(account.current_balance);
         }
       }
 
@@ -78,106 +74,170 @@ class AccountStore {
 
   async loadAccounts() {
     if (!this.state.initialized) {
-      const response = await AccountApi.getAccounts();
-      this.setAccounts(response.data);
+      const accounts = await realm.collections.accounts.aggregate([
+        {
+          $match: {
+            users: realm.currentUser.value.id,
+            deleted: false,
+          },
+        },
+        {
+          $lookup: {
+            from: "recurring",
+            localField: "_id",
+            foreignField: "account_id",
+            as: "recurring",
+          },
+        },
+        {
+          $lookup: {
+            from: "transactions",
+            localField: "_id",
+            foreignField: "account_id",
+            as: "transactions",
+          },
+        },
+      ]);
+
+      accounts.forEach((account) => {
+        const mappedRecurring = {};
+
+        account.recurring.forEach((r) => {
+          mappedRecurring[r._id.toString()] = r;
+        });
+
+        account.recurring = mappedRecurring;
+
+        const mappedTransactions = {};
+
+        account.transactions.forEach((t) => {
+          mappedTransactions[t._id.toString()] = t;
+        });
+
+        account.transactions = mappedTransactions;
+
+        this.state.accounts[account._id.toString()] = account;
+      });
+
       this.state.initialized = true;
     }
   }
 
-  async saveTransactions(
-    accountId: number,
-    date: string,
-    transactions: Array<Myze.NewTransaction>
-  ) {
-    let vendorsAdded = {};
+  async saveTransaction(transaction) {
+    const accountId = transaction.account_id.toString();
 
-    for (let t of transactions) {
-      if (t.vendor.name.length === 0) {
-        continue;
-      }
+    // Create the vendor if it doesn't exist
+    if (transaction.vendor.id === null) {
+      // Create the vendor account
+      const res = await realm.collections.vendors.insertOne({
+        userId: realm.currentUser.value.id,
+        name: transaction.vendor.name,
+      });
 
-      t.date = dayjs(date).format("YYYY-MM-DD");
-      t.account_id = accountId;
+      transaction.vendor.id = res.insertedId.toString();
+    }
 
-      if (vendorsAdded[t.vendor.name]) {
-        t.vendor = vendorsAdded[t.vendor.name];
-      } else if (t.vendor.id === null) {
-        // Create a new vendor using the provided name
-        t.vendor = await createVendor(t.vendor.name);
-        vendorsAdded[t.vendor.name] = t.vendor;
-      }
+    if (transaction.hasOwnProperty("_id")) {
+      await realm.collections.transactions.updateOne(
+        {
+          _id: transaction._id,
+        },
+        transaction
+      );
 
-      if (t.id > 0) {
-        await updateTransaction(t.id, t);
-      } else {
-        // Update the original state
-        const response = await createTransaction(t);
-        t.id = response.data;
-      }
-
-      if (!this.getAccount(accountId).transactions[t.date]) {
-        this.getAccount(accountId).transactions[t.date] = {};
-      }
+      let existingTransaction = this.state.accounts[accountId].transactions[
+        transaction._id.toString()
+      ];
 
       // If the transaction already exists, let's remove the previous amount
-      if (this.getAccount(accountId).transactions[t.date][t.id]) {
-        this.removeTransactionFromAccountBalance(this.getAccount(accountId), t);
+      if (existingTransaction) {
+        this.removeTransactionFromAccountBalance(
+          this.getAccount(accountId),
+          existingTransaction
+        );
       }
+    } else {
+      const response = await realm.collections.transactions.insertOne(
+        transaction
+      );
 
-      this.getAccount(accountId).transactions[t.date][
-        t.id
-      ] = t as Myze.Transaction;
-
-      this.addTransactionToAccountBalance(this.getAccount(accountId), t);
+      transaction._id = response.insertedId;
     }
+
+    this.state.accounts[accountId].transactions[
+      transaction._id.toString()
+    ] = transaction;
+
+    this.addTransactionToAccountBalance(
+      this.getAccount(accountId),
+      transaction
+    );
+
+    await realm.collections.accounts.updateOne(
+      {
+        _id: this.getAccount(accountId)._id,
+      },
+      {
+        $set: {
+          current_balance: this.getAccount(accountId).current_balance,
+        },
+      }
+    );
   }
 
-  removeTransactionFromAccountBalance(
+  async addTransactionToAccountBalance(
     account: Myze.Account,
     transaction: Myze.Transaction
   ) {
     if (transaction.type === "DEBIT") {
-      account.balance += transaction.amount;
+      account.current_balance -= transaction.amount;
     } else {
-      account.balance -= transaction.amount;
+      account.current_balance += transaction.amount;
     }
   }
 
-  addTransactionToAccountBalance(
+  async removeTransactionFromAccountBalance(
     account: Myze.Account,
     transaction: Myze.Transaction
   ) {
     if (transaction.type === "DEBIT") {
-      account.balance -= transaction.amount;
+      account.current_balance += transaction.amount;
     } else {
-      account.balance += transaction.amount;
+      account.current_balance -= transaction.amount;
     }
   }
 
   async removeTransaction(transaction: Myze.Transaction) {
     // Delete the transaction from DB
-    await deleteTransaction(transaction.id);
-    const account = this.getAccount(transaction.account_id);
+
+    await realm.collections.transactions.updateOne(
+      {
+        _id: transaction._id,
+      },
+      {
+        $set: {
+          deleted: true,
+        },
+      }
+    );
+
+    const account = this.getAccount(transaction.account_id.toString());
 
     // Update the account balance
-    if (transaction.type === "DEBIT") {
-      account.balance += transaction.amount;
-    } else {
-      account.balance -= transaction.amount;
-    }
+    this.removeTransactionFromAccountBalance(account, transaction);
 
+    await realm.collections.accounts.updateOne(
+      {
+        _id: account._id,
+      },
+      {
+        $set: {
+          current_balance: account.current_balance,
+        },
+      }
+    );
     // If there's only one transaction left for this date, let's delete it all, otherwise we will delete the transaction
-    if (Object.keys(account.transactions[transaction.date]).length === 1) {
-      delete account.transactions[transaction.date];
-    } else {
-      delete account.transactions[transaction.date][transaction.id];
-    }
-  }
-
-  setAccounts(accounts: { [key: number]: Myze.Account }) {
-    for (let accountId in accounts) {
-      this.state.accounts[accountId] = accounts[accountId] as Myze.Account;
-    }
+    delete account.transactions[transaction._id.toString()];
   }
 
   getAccount(id: number): Myze.Account {
@@ -185,53 +245,95 @@ class AccountStore {
   }
 
   async createAccount(newAccount: Myze.NewAccount): Promise<Myze.Account> {
-    const response = await AccountApi.createAccount(newAccount);
-
     const account: Myze.Account = {
-      id: response.data.account_id,
       ...newAccount,
-      transactions: {},
-      recurring: [],
+      current_balance: newAccount.starting_balance,
+      users: [realm.currentUser.value.id],
+      deleted: false,
     };
 
-    this.state.accounts[account.id] = account;
+    const res = await realm.collections.accounts.insertOne(account);
+
+    account._id = res.insertedId;
+    account.transactions = {};
+    account.recurring = {};
+
+    this.state.accounts[account._id.toString()] = account;
 
     return account;
   }
 
-  async saveRecurring(
-    newRecurring: Myze.NewRecurring
-  ): Promise<Myze.Recurring> {
-    const response = await RecurringApi.createRecurring(newRecurring);
-
-    if (response.data.vendor_id) {
-      newRecurring.vendor = {
-        id: response.data.vendor_id,
+  async saveRecurring(newRecurring): Promise<Myze.Recurring> {
+    // Create the vendor if it doesn't exist
+    if (newRecurring.vendor.id === null) {
+      // Create the vendor account
+      const res = await realm.collections.vendors.insertOne({
+        userId: realm.currentUser.value.id,
         name: newRecurring.vendor.name,
-      };
+      });
 
-      addVendor(newRecurring.vendor);
+      newRecurring.vendor.id = res.insertedId.toString();
     }
 
-    const recurring: Myze.Recurring = {
-      id: response.data.recurring_id,
-      ...newRecurring,
-    };
+    if (newRecurring.hasOwnProperty("_id")) {
+      // Update
+      await realm.collections.recurring.updateOne(
+        {
+          _id: newRecurring._id,
+        },
+        newRecurring
+      );
 
-    this.state.accounts[recurring.account_id].recurring[
-      recurring.id
-    ] = recurring;
+      this.state.accounts[newRecurring.account_id.toString()].recurring[
+        newRecurring._id.toString()
+      ] = {
+        ...newRecurring,
+      };
+    } else {
+      // Create
 
-    return recurring;
+      const response = await realm.collections.recurring.insertOne(
+        newRecurring
+      );
+
+      this.state.accounts[newRecurring.account_id.toString()].recurring[
+        response.insertedId.toString()
+      ] = {
+        _id: response.insertedId,
+        ...newRecurring,
+      };
+    }
   }
 
   async removeRecurring(recurring: Myze.Recurring) {
-    await RecurringApi.deleteRecurring(recurring.id);
-    delete this.state.accounts[recurring.account_id].recurring[recurring.id];
+    await realm.collections.recurring.updateOne(
+      {
+        _id: recurring._id,
+      },
+      {
+        $set: {
+          deleted: false,
+        },
+      }
+    );
+
+    delete this.state.accounts[recurring.account_id.toString()].recurring[
+      recurring._id.toString()
+    ];
   }
 
-  async deleteAccount(accountId: number) {
-    await AccountApi.deleteAccount(accountId);
+  async deleteAccount(accountId: string) {
+    await realm.collections.accounts.updateOne(
+      {
+        _id: accountId,
+      },
+      {
+        $set: {
+          deleted: false,
+        },
+      }
+    );
+
     delete this.state.accounts[accountId];
   }
 }

@@ -19,7 +19,7 @@
 
       async function deleteAccount() {
         await accountStore.deleteAccount(props.account.id);
-        router.push(`/portfolio`);
+        router.push(`/accounts`);
       }
 
       return { deleteAccount };

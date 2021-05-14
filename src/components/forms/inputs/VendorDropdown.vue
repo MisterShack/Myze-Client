@@ -6,6 +6,7 @@
       class="form-input block w-full px-3 py-2 sm:text-sm sm:leading-5"
       id="t_vendor"
       name="Vendor"
+      @keyup.down="highlightNextVendor"
     />
     <div
       v-if="state.filteredVendors.length > 0"
@@ -20,10 +21,16 @@
         class="rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5"
       >
         <li
-          v-for="vendor in state.filteredVendors"
+          v-for="(vendor, idx) in state.filteredVendors"
           :key="vendor.name"
           role="option"
-          class="cursor-default select-none relative py-2 px-3 text-gray-900 hover:text-white hover:bg-indigo-600"
+          class="cursor-default select-none relative py-2 px-3"
+          :class="
+            state.highlightedVendor === idx
+              ? 'text-white bg-indigo-600'
+              : 'text-gray-900'
+          "
+          @mouseover="highlightVendor(idx)"
           @click="selectVendor(vendor)"
         >
           <div class="flex items-center space-x-3">
@@ -59,10 +66,12 @@
     setup(props) {
       const state = reactive({
         filteredVendors: [],
+        highlightedVendor: null,
       });
 
       function filterVendors() {
         props.selectedVendor.id = null;
+        state.highlightedVendor = null;
 
         if (Object.keys(props.vendors).length === 0) {
           state.filteredVendors = [];
@@ -86,10 +95,22 @@
         clearVendors();
       }
 
+      function highlightVendor(vendorIdx) {
+        state.highlightedVendor = vendorIdx;
+      }
+
+      function highlightNextVendor() {
+        if (state.highlightedVendor < state.filteredVendors.length) {
+          state.highlightNextVendor++;
+        }
+      }
+
       return {
         state,
         clearVendors,
         filterVendors,
+        highlightVendor,
+        highlightNextVendor,
         selectVendor,
       };
     },

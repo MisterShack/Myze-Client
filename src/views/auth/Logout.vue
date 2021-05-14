@@ -2,12 +2,14 @@
 <script>
   import { defineComponent } from "vue";
   import { useRouter } from "vue-router";
-  import { auth } from "@/auth";
+  import { realm } from "@/realm";
 
   export default defineComponent({
     setup() {
       const router = useRouter();
-      auth.signOut().then(() => router.push("/login"));
+      realm.currentUser.value.logOut().then(() => {
+        router.push("/login");
+      });
     },
   });
 </script>

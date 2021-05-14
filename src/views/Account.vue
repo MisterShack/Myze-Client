@@ -5,7 +5,7 @@
   <template v-else>
     <router-link
       class="flex items-center text-gray-600 cursor-pointer mb-5"
-      to="/portfolio"
+      to="/overview"
     >
       <svg
         class="h-4"
@@ -33,7 +33,7 @@
             new Intl.NumberFormat("en-CA", {
               style: "currency",
               currency: "CAD",
-            }).format(state.account.balance / 100)
+            }).format(state.account.current_balance / 100)
           }}
         </h3>
       </div>
@@ -77,7 +77,7 @@
 </template>
 
 <script>
-  import { reactive } from "vue";
+  import { reactive, watch } from "vue";
   import { useRoute } from "vue-router";
   import { accountStore } from "@/store/account-store.ts";
 
@@ -108,7 +108,6 @@
 
       accountStore.loadAccounts().then(() => {
         state.account = accountStore.getAccount(route.params.id);
-
         state.loading = false;
       });
 
