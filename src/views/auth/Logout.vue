@@ -8,6 +8,8 @@
     setup() {
       const router = useRouter();
       realm.currentUser.value.logOut().then(() => {
+        realm.state.app.removeUser(realm.currentUser.value);
+
         router.push("/login");
       });
     },
