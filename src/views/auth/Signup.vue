@@ -91,7 +91,7 @@
 
 <script>
   import { defineComponent, reactive } from "vue";
-  import { app, loginWithEmailAndPassword } from "@/realm";
+  import { realm } from "@/realm";
   import { useRouter } from "vue-router";
   export default defineComponent({
     setup() {
@@ -105,8 +105,11 @@
       async function signup() {
         if (state.email == "" || state.password == "") return;
 
-        await app.emailPasswordAuth.registerUser(state.email, state.password);
-        await loginWithEmailAndPassword(state.email, state.password);
+        await realm.state.app.emailPasswordAuth.registerUser(
+          state.email,
+          state.password
+        );
+        await realm.loginWithEmailAndPassword(state.email, state.password);
 
         router.push("/overview");
       }
