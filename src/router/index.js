@@ -1,8 +1,6 @@
-import { watch } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
 import { realm } from "@/realm";
 
-const Home = () => import("@/views/Home.vue");
 const Login = () => import("@/views/auth/Login.vue");
 const Signup = () => import("@/views/auth/Signup.vue");
 const Logout = () => import("@/views/auth/Logout.vue");
@@ -13,15 +11,6 @@ const Settings = () => import("@/views/Settings.vue");
 const Account = () => import("@/views/Account.vue");
 
 const routes = [
-  {
-    path: "/home",
-    name: "Home",
-    component: Home,
-    meta: {
-      layout: "HomeLayout",
-      public: true,
-    },
-  },
   {
     path: "/",
     alias: "/login",
