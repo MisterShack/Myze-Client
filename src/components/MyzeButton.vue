@@ -1,22 +1,32 @@
 <template>
   <button
-    class="shadow-sm rounded border px-5 py-2 text-base cursor-pointer font-semibold transition duration-150 ease-in"
-    :class="[themeClasses, disabledClasses]"
+    class="shadow-sm rounded border pr-2 py-1 text-sm  md:py-2  md:text-base cursor-pointer font-semibold transition duration-150 ease-in flex items-center"
+    :class="[
+      themeClasses,
+      disabledClasses,
+      icon ? 'md:pl-2 md:pr-4' : 'md:px-4',
+    ]"
   >
+    <template v-if="icon === 'Add'"><PlusIcon class="h-6 w-6 mr-1"/></template>
+    <template v-if="icon === 'Save'"><SaveIcon class="h-6 w-6 mr-1"/></template>
+    <template v-if="icon === 'Delete'"><XIcon class="h-6 w-6 mr-1"/></template>
     <slot />
   </button>
 </template>
 
 <script>
   import { computed } from "vue";
+  import { PlusIcon, SaveIcon, XIcon } from "@heroicons/vue/outline/esm";
   export default {
     props: {
       theme: String,
+      icon: String,
       disabled: {
         type: Boolean,
         default: false,
       },
     },
+    components: { PlusIcon, SaveIcon, XIcon },
     setup(props) {
       const disabledClasses = computed(() =>
         props.disabled
@@ -35,8 +45,11 @@
         }
       });
 
+      const icon = props.icon;
+
       return {
         disabledClasses,
+        icon,
         themeClasses,
       };
     },

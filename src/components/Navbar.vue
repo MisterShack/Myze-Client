@@ -1,15 +1,11 @@
 <template>
-  <div class="relative py-6">
+  <div class="relative py-2 bg-cyan-900 ">
     <nav
-      class="relative flex items-center justify-between sm:h-10 lg:justify-start"
+      class="relative flex items-center justify-between sm:h-10 lg:justify-start max-w-6xl w-4/5 mx-auto"
     >
       <div class="flex items-center flex-grow flex-shrink-0 lg:flex-grow-0">
         <div class="flex items-center justify-between w-full md:w-auto">
-          <a
-            href="/"
-            aria-label="Home"
-            class="text-3xl font-bold text-blue-700"
-          >
+          <a href="/" aria-label="Home" class="text-3xl font-bold text-white">
             MYZE
           </a>
           <div class="-mr-2 flex items-center md:hidden">
@@ -38,30 +34,32 @@
           </div>
         </div>
       </div>
-      <div class="hidden md:block md:ml-10 md:pr-4">
+      <div class="hidden md:block md:ml-10 md:pr-4 flex-1">
         <a
           href="#"
-          class="font-medium text-gray-600 hover:text-gray-900 transition duration-150 ease-in-out"
+          class="font-medium text-cyan-100 hover:text-white transition duration-150 ease-in-out"
           >Product</a
         >
         <a
           href="#"
-          class="ml-8 font-medium text-gray-600 hover:text-gray-900 transition duration-150 ease-in-out"
+          class="ml-8 font-medium text-cyan-100 hover:text-white transition duration-150 ease-in-out"
           >Features</a
         >
         <a
           href="#"
-          class="ml-8 font-medium text-gray-600 hover:text-gray-900 transition duration-150 ease-in-out"
+          class="ml-8 font-medium text-cyan-100 hover:text-white transition duration-150 ease-in-out"
           >Company</a
         >
         <a
           href="#"
-          class="ml-8 font-medium text-gray-600 hover:text-gray-900 transition duration-150 ease-in-out"
+          class="ml-8 font-medium text-cyan-100 hover:text-white transition duration-150 ease-in-out"
           >Contact</a
         >
+      </div>
+      <div>
         <router-link
           v-if="user !== null"
-          class="ml-8 font-medium text-blue-600 hover:text-blue-900 transition duration-150 ease-in-out"
+          class="ml-8 font-medium text-cyan-100 hover:text-white transition duration-150 ease-in-out"
           to="/logout"
         >
           Logout
@@ -73,7 +71,7 @@
 
 <script>
   import { reactive } from "vue";
-  import { user } from "@/auth/index.js";
+  import { realm } from "@/realm";
 
   export default {
     setup() {
@@ -87,7 +85,7 @@
 
       return {
         state,
-        user,
+        user: realm.currentUser.value,
         toggleMobileMenu,
       };
     },

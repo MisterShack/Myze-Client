@@ -133,7 +133,7 @@
         type: String,
       },
     },
-    emits: ["select"],
+    emits: ["select", "update:selectedKey"],
     setup(props, context) {
       const state = reactive({
         options: props.options,
@@ -158,6 +158,7 @@
       function selectOption(selectedKey) {
         state.selectedKey = selectedKey;
         state.showOptions = false;
+        context.emit("update:selectedKey", selectedKey);
         context.emit("select", selectedKey);
       }
 

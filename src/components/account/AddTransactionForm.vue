@@ -1,47 +1,26 @@
 <template>
-  <div class="my-5">
-    <label
-      for="transaction_date"
-      class="block text-sm leading-5 font-medium text-gray-700"
-      >Date</label
-    >
+  <FormField>
+    <template #label>Date</template>
     <div class="mt-1 relative rounded-md shadow-sm">
       <DatePicker
-        :selectedDate="state.selectedDate"
+        :selectedDate="state.transaction.date"
         @select-date="selectDate"
         Required
       ></DatePicker>
     </div>
-  </div>
+  </FormField>
 
-  <Collapsible v-for="(transaction, key) in state.transactions" :key="key">
-    <template #title>
-      <span>{{
-        transaction.vendor.name.length > 0
-          ? transaction.vendor.name
-          : "New Transaction"
-      }}</span>
-      <span>${{ (transaction.amount / 100).toFixed(2) }}</span>
-    </template>
+  <FormField>
+    <template #label>Vendor</template>
+    <VendorDropdown
+      :vendors="state.vendors"
+      v-model:selectedVendor="state.transaction.vendor"
+    />
+  </FormField>
 
-    <div class="mb-5">
-      <label
-        for="t_vendor"
-        class="block text-sm leading-5 font-medium text-gray-700"
-        >Vendor</label
-      >
-      <VendorDropdown
-        :vendors="state.vendors"
-        v-model:selectedVendor="transaction.vendor"
-      />
-    </div>
-
-    <div class="mb-5">
-      <label
-        for="t_amount"
-        class="block text-sm leading-5 font-medium text-gray-700"
-        >Amount</label
-      >
+  <div class="flex -my-5">
+    <FormField class="flex-1 mr-5">
+      <template #label>Amount</template>
       <div class="mt-1 relative rounded-md shadow-sm">
         <div
           class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
@@ -55,39 +34,41 @@
           type="number"
           step="0.01"
           name="StartingBalance"
-          :value="transaction.amount / 100"
-          @input="transaction.amount = Math.max($event.target.value, 0) * 100"
+          :value="state.transaction.amount / 100"
+          @input="
+            state.transaction.amount = Math.max($event.target.value, 0) * 100
+          "
         />
       </div>
-    </div>
+    </FormField>
+    <FormField class="my-0">
+      <template #label>Type</template>
+      <SelectMenu
+        :options="state.typeOptions"
+        v-model:selectedKey="state.transaction.type"
+      />
+    </FormField>
+  </div>
 
-    <div>
-      <label
-        for="t_vendor"
-        class="block text-sm leading-5 font-medium text-gray-700"
-        >Description</label
-      >
-      <div class="mt-1 relative rounded-md shadow-sm">
-        <textarea
-          class="form-input block w-full px-3 py-2"
-          v-model="transaction.description"
-        ></textarea>
-      </div>
+  <FormField>
+    <template #label>Description</template>
+    <div class="mt-1 relative rounded-md shadow-sm">
+      <textarea
+        class="form-input block w-full px-3 py-2"
+        v-model="state.transaction.description"
+      ></textarea>
     </div>
+  </FormField>
 
-    <MyzeButton class="mt-5" theme="Danger" @click="removeTransaction(key)"
+  <div class="flex justify-between">
+    <MyzeButton theme="Success" icon="Save" @click="save">Save</MyzeButton>
+    <MyzeButton
+      v-if="state.transaction._id"
+      theme="Danger"
+      icon="Delete"
+      @click="remove"
       >Delete</MyzeButton
     >
-  </Collapsible>
-
-  <div class="flex justify-between align-middle">
-    <MyzeButton theme="Success" @click="addTransaction('DEBIT')"
-      >Add Debit</MyzeButton
-    >
-    <MyzeButton theme="Success" @click="addTransaction('CREDIT')"
-      >Add Credit</MyzeButton
-    >
-    <MyzeButton theme="Success" @click="save">Save</MyzeButton>
   </div>
 </template>
 
@@ -101,13 +82,15 @@
 </style>
 
 <script>
-  import { reactive, watch } from "vue";
+  import { reactive } from "vue";
   import { getVendors } from "@/store/vendor";
   import { accountStore } from "@/store/account-store.ts";
 
   import Collapsible from "@/components/forms/Collapsible.vue";
   import DatePicker from "@/components/forms/inputs/DatePicker.vue";
   import MyzeButton from "@/components/MyzeButton.vue";
+  import FormField from "@/components/forms/inputs/FormField.vue";
+  import SelectMenu from "@/components/forms/inputs/SelectMenu.vue";
   import VendorDropdown from "@/components/forms/inputs/VendorDropdown.vue";
 
   export default {
@@ -116,82 +99,66 @@
         type: Object,
         required: true,
       },
-      selectedDate: String,
+      transactionId: String,
     },
-    components: { DatePicker, Collapsible, VendorDropdown, MyzeButton },
+    components: {
+      Collapsible,
+      DatePicker,
+      FormField,
+      MyzeButton,
+      SelectMenu,
+      VendorDropdown,
+    },
     emits: ["close"],
     setup(props, { emit }) {
       const state = reactive({
         vendors: getVendors(),
-        selectedDate: props.selectedDate,
-        transactions: [],
-        transactionsByDate: props.account.transactions,
+        transaction: getDefaultTransaction(),
+        typeOptions: {
+          DEBIT: "Expense",
+          CREDIT: "Income",
+        },
       });
 
-      watch(
-        () => props.selectedDate,
-        (selectedDate) => {
-          selectDate(selectedDate);
-        }
-      );
-
-      function refreshTransactions() {
-        state.transactions = [];
-
-        if (state.transactionsByDate[state.selectedDate]) {
-          Object.values(state.transactionsByDate[state.selectedDate]).forEach(
-            (transaction) => {
-              state.transactions.push(
-                Object.fromEntries(Object.entries(transaction))
-              );
-            }
-          );
-        }
-      }
-
-      function addTransaction(type) {
-        state.transactions.push({
+      function getDefaultTransaction() {
+        return {
+          date: new Date().toISOString().substr(0, 10),
+          account_id: props.account._id,
           amount: 0,
           vendor: {
             id: null,
             name: "",
           },
-          type: type,
+          type: "DEBIT",
           description: "",
-        });
+        };
+      }
+
+      if (props.transactionId) {
+        state.transaction = {
+          ...props.account.transactions[props.transactionId],
+        };
       }
 
       function selectDate(date) {
-        state.selectedDate = date;
-        refreshTransactions();
+        state.transaction.date = date;
       }
 
-      async function removeTransaction(transactionIdx) {
-        if (state.transactions[transactionIdx].account_id) {
-          // Remove from DB, and local store
-          await accountStore.removeTransaction(
-            state.transactions[transactionIdx]
-          );
-        }
-
-        // Remove from this panel list
-        state.transactions.splice(transactionIdx, 1);
+      async function remove() {
+        // Remove from DB, and local store
+        await accountStore.removeTransaction(state.transaction);
+        emit("close");
       }
 
       // TODO - Move to a service/store file
       async function save() {
-        await accountStore.saveTransactions(
-          props.account.id,
-          state.selectedDate,
-          state.transactions
-        );
+        await accountStore.saveTransaction(state.transaction);
         emit("close");
       }
 
       return {
         state,
-        addTransaction,
-        removeTransaction,
+        remove,
         save,
         selectDate,
       };

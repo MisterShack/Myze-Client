@@ -16,13 +16,13 @@
       <h2 class="text-lg tracking-wide">Transactions</h2>
       <button
         class="bg-green-100 py-2 px-4 text-xs font-semibold text-green-900 border border-green-500 border-opacity-20 hover:border-opacity-100 transition-all duration-300 ease-in-out rounded-md"
-        @click="openTransactionPanel(new Date().toISOString().substring(0, 10))"
+        @click="openTransactionPanel()"
       >
         Add Transaction
       </button>
     </div>
     <p
-      v-if="Object.keys(state.transactionsByDate).length === 0"
+      v-if="Object.keys(transactionsByDate).length === 0"
       class="text-center text-gray-500 py-10"
     >
       No transactions to display!
@@ -34,12 +34,13 @@
         >
           {{ date }}
         </li>
-        <li class="mb-5" @click="openTransactionPanel(date)">
+        <li class="mb-5">
           <ul>
             <li
-              v-for="transaction in state.transactionsByDate[date]"
+              v-for="transaction in transactionsByDate[date]"
               :key="`Transaction_${transaction.id}`"
               class="py-1 flex items-center justify-between text-gray-600"
+              @click="openTransactionPanel(transaction._id.toString())"
             >
               <div>
                 <p>{{ transaction.vendor.name }}</p>
@@ -66,15 +67,14 @@
     </ul>
   </div>
 
-  <Panel
-    :active="state.showTransactionPanel"
-    @close="state.showTransactionPanel = false"
-  >
-    <template #title>Add Transactions</template>
+  <Panel v-model:active="state.showTransactionPanel">
+    <template #title
+      >{{ state.transactionToEdit ? "Edit" : "Add" }} Transaction</template
+    >
     <template v-slot="scope">
       <AddTransactionForm
         :account="account"
-        :selectedDate="state.selectedDate"
+        :transactionId="state.transactionToEdit"
         @close="scope.close"
       />
     </template>
@@ -82,7 +82,7 @@
 </template>
 
 <script>
-  import { reactive, computed, watch, onBeforeMount } from "vue";
+  import { reactive, computed, watch } from "vue";
   import { getVendors } from "@/store/vendor";
 
   import Panel from "@/components/Panel.vue";
@@ -101,33 +101,41 @@
     components: { Panel, AddTransactionForm },
     setup(props) {
       const state = reactive({
-        selectedDate: null,
+        transactionToEdit: null,
         showTransactionPanel: false,
         vendors: getVendors(),
-        transactionsByDate: props.account.transactions,
+        transactions: props.account.transactions,
       });
 
       const sortedTransactionDates = computed(() =>
-        Object.keys(props.account.transactions).sort(
+        Object.keys(transactionsByDate.value).sort(
           (a, b) => new Date(b) - new Date(a)
         )
       );
 
-      watch(
-        () => props.account.transactions,
-        (transactions) => {
-          state.transactionsByDate = transactions;
-        }
-      );
+      const transactionsByDate = computed(() => {
+        const transactionsByDate = {};
 
-      function openTransactionPanel(date) {
-        state.selectedDate = date;
+        Object.values(state.transactions).forEach((t) => {
+          if (!transactionsByDate[t.date]) {
+            transactionsByDate[t.date] = {};
+          }
+
+          transactionsByDate[t.date][t._id.toString()] = t;
+        });
+
+        return transactionsByDate;
+      });
+
+      function openTransactionPanel(transactionId) {
+        state.transactionToEdit = transactionId;
         state.showTransactionPanel = true;
       }
 
       return {
         state,
         sortedTransactionDates,
+        transactionsByDate,
         openTransactionPanel,
       };
     },

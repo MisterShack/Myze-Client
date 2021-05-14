@@ -103,7 +103,7 @@
         type: Object,
         required: true,
       },
-      recurringId: Number,
+      recurringId: String,
     },
     components: {
       DatePicker,
@@ -131,8 +131,7 @@
 
       function getDefaultRecurring() {
         return {
-          id: null,
-          account_id: props.account.id,
+          account_id: props.account._id,
           vendor: {
             id: null,
             name: "",
@@ -146,18 +145,10 @@
         };
       }
 
-      watch(
-        () => props.recurringId,
-        (recurringId) => {
-          if (recurringId) {
-            state.recurring = { ...props.account.recurring[recurringId] };
-          } else {
-            state.recurring = getDefaultRecurring();
-          }
-        }
-      );
+      if (props.recurringId) {
+        state.recurring = { ...props.account.recurring[props.recurringId] };
+      }
 
-      // TODO - Move to a service/store file
       async function save() {
         await accountStore.saveRecurring(state.recurring);
         emit("form-saved");

@@ -23,7 +23,7 @@
     </p>
   </div>
 
-  <div class="bg-white shadow-md rounded-lg p-6 pb-1">
+  <div class="p-6 pb-1">
     <div class="flex justify-between items-center">
       <h2 class="text-lg tracking-wide">Recurring</h2>
       <button
@@ -34,10 +34,13 @@
       </button>
     </div>
     <ul class="my-6">
-      <template v-for="recurring in state.recurring" :key="recurring.id">
+      <template
+        v-for="recurring in state.recurring"
+        :key="recurring._id.toString()"
+      >
         <li
           class="py-1 mb-2 flex items-center justify-between text-gray-600 cursor-pointer"
-          @click="openRecurringPanel(recurring.id)"
+          @click="openRecurringPanel(recurring._id.toString())"
         >
           <div>
             <p>{{ recurring.vendor.name }}</p>
@@ -61,10 +64,8 @@
       </template>
     </ul>
   </div>
-  <Panel
-    :active="state.showRecurringPanel"
-    @close="state.showRecurringPanel = false"
-  >
+
+  <Panel v-model:active="state.showRecurringPanel">
     <template #title>Add Recurring</template>
     <template v-slot="scope">
       <AddRecurringForm
@@ -113,7 +114,9 @@
       );
 
       function getAnnualCashFlow() {
-        return RecurringService.generateAnnualCashFlow(props.account.id);
+        return RecurringService.generateAnnualCashFlow(
+          props.account._id.toString()
+        );
       }
 
       const recurringTypes = {

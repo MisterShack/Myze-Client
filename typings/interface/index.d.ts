@@ -43,10 +43,9 @@ export interface RecurringInterval {
 }
 
 export interface Account {
-  readonly id: number;
+  readonly id: string;
   readonly name: string;
   balance: number;
-  readonly owner: Boolean;
   readonly type: string;
   readonly transactions: { [key: string]: { [key: number]: Transaction } };
   readonly recurring: Array<object>;
@@ -87,7 +86,11 @@ export interface Vendor {
 
 export interface AccountStoreState {
   initialized: boolean;
-  accounts: { [key: number]: Account };
+  accounts: { [key: string]: Account };
   accountsByType?: Object;
   groupedTransactionsByAccount: Object;
+}
+
+export interface RealmServiceState {
+  app: Realm.App;
 }
