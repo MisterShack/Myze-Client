@@ -70,7 +70,9 @@ function validateRoutes(to, next) {
   const isOnlyPublicRoute = to.matched.some(
     (record) => record.meta.public === "strict"
   );
-  const userIsAuthenticated = realm.currentUser.value;
+  const userIsAuthenticated = !!realm.currentUser.value;
+
+  console.log(userIsAuthenticated);
 
   // If not a public route and the user isn't authenticated, redirect to login
   if (!isPublicRoute && !userIsAuthenticated) {
