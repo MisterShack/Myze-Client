@@ -93,4 +93,5 @@ export interface AccountStoreState {
 
 export interface RealmServiceState {
   app: Realm.App;
+  user: Realm.User;
 }

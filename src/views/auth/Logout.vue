@@ -7,9 +7,8 @@
   export default defineComponent({
     setup() {
       const router = useRouter();
-      realm.currentUser.value.logOut().then(() => {
-        realm.state.app.removeUser(realm.currentUser.value);
-
+      realm.app.currentUser.logOut().then(() => {
+        realm.currentUser.value = null;
         router.push("/login");
       });
     },

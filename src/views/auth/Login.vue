@@ -111,8 +111,14 @@
       const router = useRouter();
 
       async function login() {
-        await realm.loginWithEmailAndPassword(state.email, state.password);
-        router.push("/overview");
+        const user = await realm.loginWithEmailAndPassword(
+          state.email,
+          state.password
+        );
+
+        if (user !== null) {
+          router.push("/overview");
+        }
       }
 
       return {
