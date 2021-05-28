@@ -34,9 +34,9 @@
   <template v-else>
     <div class="grid grid-cols-1 gap-2 md:grid-cols-2 md:auto-rows-auto">
       <div
-        class="bg-white px-5 rounded-lg"
-        v-for="group in accountStore.state.accountsByType"
-        :key="group"
+        class="bg-white md:px-5 rounded-lg"
+        v-for="(group, accountType) in accountStore.state.accountsByType"
+        :key="accountType"
       >
         <div
           class="flex items-center justify-between text-light-blue-700  border-b border-light-blue-700 pb-1 border-opacity-30 pt-3"
