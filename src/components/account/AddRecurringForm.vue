@@ -62,7 +62,11 @@
       step="0.01"
       name="StartingBalance"
       :value="state.recurring.amount / 100"
-      @input="state.recurring.amount = Math.max($event.target.value, 0) * 100"
+      @input="
+        state.recurring.amount = Currency.createFromString(
+          $event.target.value
+        ).amount
+      "
     />
   </FormField>
 
@@ -86,9 +90,10 @@
 </template>
 
 <script>
-  import { reactive, watch } from "vue";
+  import { reactive } from "vue";
   import { getVendors } from "@/store/vendor";
   import { accountStore } from "@/store/account-store.ts";
+  import Currency from "@/helpers/Currency";
   import dayjs from "dayjs";
 
   import FormField from "@/components/forms/inputs/FormField.vue";
@@ -165,6 +170,7 @@
         state,
         save,
         removeRecurring,
+        Currency,
       };
     },
   };

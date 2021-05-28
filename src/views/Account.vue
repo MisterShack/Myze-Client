@@ -30,10 +30,10 @@
         <h1 class="font-thin text-lg">{{ state.account.name }}</h1>
         <h3 class="text-4xl text-light-blue-700 md:text-3xl">
           {{
-            new Intl.NumberFormat("en-CA", {
-              style: "currency",
-              currency: "CAD",
-            }).format(state.account.current_balance / 100)
+            new Currency(
+              state.account.current_balance /
+                (state.account.type === "CREDIT_CARD" ? -100 : 100)
+            ).format()
           }}
         </h3>
       </div>
@@ -85,6 +85,7 @@
   import Transactions from "@/components/account/Transactions.vue";
   import Recurring from "@/components/account/Recurring.vue";
   import Settings from "@/components/account/Settings.vue";
+  import Currency from "@/helpers/Currency";
 
   export default {
     components: { Overview, Transactions, Recurring, Settings },
@@ -114,6 +115,7 @@
       return {
         state,
         navLinks,
+        Currency,
       };
     },
   };

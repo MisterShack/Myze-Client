@@ -49,16 +49,10 @@
                 </p>
               </div>
               <span v-if="transaction.type === 'DEBIT'" class="text-lg">{{
-                new Intl.NumberFormat("en-CA", {
-                  style: "currency",
-                  currency: "CAD",
-                }).format((transaction.amount / 100) * -1)
+                new Currency(transaction.amount / -100).format()
               }}</span>
               <span v-else class="text-lg">{{
-                new Intl.NumberFormat("en-CA", {
-                  style: "currency",
-                  currency: "CAD",
-                }).format(transaction.amount / 100)
+                new Currency(transaction.amount / 100).format()
               }}</span>
             </li>
           </ul>
@@ -84,6 +78,7 @@
 <script>
   import { reactive, computed, watch } from "vue";
   import { getVendors } from "@/store/vendor";
+  import Currency from "@/helpers/Currency";
 
   import Panel from "@/components/Panel.vue";
   import AddTransactionForm from "@/components/account/AddTransactionForm.vue";
@@ -137,6 +132,7 @@
         sortedTransactionDates,
         transactionsByDate,
         openTransactionPanel,
+        Currency,
       };
     },
   };

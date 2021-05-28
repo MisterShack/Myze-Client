@@ -46,10 +46,9 @@
           </span>
           <span>
             {{
-              new Intl.NumberFormat("en-CA", {
-                style: "currency",
-                currency: "CAD",
-              }).format(group.balance / 100)
+              new Currency(
+                group.balance / (accountType === "CREDIT_CARD" ? -100 : 100)
+              ).format()
             }}</span
           >
         </div>
@@ -65,10 +64,10 @@
             >
               <span>{{ account.name }}</span>
               {{
-                new Intl.NumberFormat("en-CA", {
-                  style: "currency",
-                  currency: "CAD",
-                }).format(account.current_balance / 100)
+                new Currency(
+                  account.current_balance /
+                    (account.type === "CREDIT_CARD" ? -100 : 100)
+                ).format()
               }}
             </router-link>
           </li>
@@ -91,6 +90,7 @@
   import Panel from "@/components/Panel.vue";
   import AddAccountPanel from "@/components/account/AddAccountPanel.vue";
   import { accountStore } from "@/store/account-store";
+  import Currency from "@/helpers/Currency";
 
   export default defineComponent({
     components: { MyzeButton, AddAccountPanel, Panel, PageHeader },
@@ -111,6 +111,7 @@
         state,
         accountStore,
         showAddAccountPanel,
+        Currency,
       };
     },
   });

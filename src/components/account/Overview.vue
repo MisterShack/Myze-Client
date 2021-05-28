@@ -98,6 +98,7 @@
   import { computed, reactive, watch } from "vue";
 
   import dayjs from "dayjs";
+  import Currency from "@/helpers/Currency";
   import RecurringService from "@/services/RecurringService.ts";
 
   export default {
@@ -158,6 +159,7 @@
       return {
         state,
         latestTransactions,
+        Currency,
       };
     },
   };
