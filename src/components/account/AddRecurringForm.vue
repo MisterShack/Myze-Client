@@ -126,11 +126,12 @@
           "1W": "Every Week",
           "2W": "Every Two Weeks",
           "1M": "Every Month",
+          "1Y": "Every Year",
           Custom: "Custom",
         },
         type_options: {
-          DEBIT: "Debit",
-          CREDIT: "Credit",
+          DEBIT: "Expense",
+          CREDIT: "Income",
         },
       });
 

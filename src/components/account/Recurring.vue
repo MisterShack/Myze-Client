@@ -123,6 +123,7 @@
         "1W": "Every week",
         "2W": "Every two weeks",
         "1M": "Every month",
+        "1Y": "Every year",
       };
 
       function openRecurringPanel(recurringId) {
