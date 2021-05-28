@@ -3,26 +3,6 @@
     <p>Loading...</p>
   </div>
   <template v-else>
-    <router-link
-      class="flex items-center text-gray-600 cursor-pointer mb-5"
-      to="/overview"
-    >
-      <svg
-        class="h-4"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M10 19l-7-7m0 0l7-7m-7 7h18"
-        />
-      </svg>
-      <span class="pl-1">Back</span>
-    </router-link>
     <div
       class="flex flex-wrap justify-center pb-10 items-center md:justify-between"
     >
