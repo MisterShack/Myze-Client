@@ -1,18 +1,18 @@
 <template>
   <aside
-    class="bg-gradient-to-b to-blue-200 from-light-blue-100 h-screen fixed top-0 left-0 flex flex-col items-center"
+    class="fixed bottom-0 left-0 md:top-0 md:h-screen w-screen md:w-auto flex flex-auto md:flex-col items-center bg-gradient-to-b to-blue-200 from-light-blue-100"
   >
     <router-link
       v-for="link in links"
       :key="link.url"
       :to="link.url"
-      class="p-5 block  "
+      class="p-3 md:p-5 block flex-1 md:flex-initial"
       :class="
         currentRoute === link.url
           ? 'text-blue-500'
           : 'text-blue-300 hover:animate-pulse'
       "
-      ><component :is="link.icon"></component
+      ><component class="m-auto" :is="link.icon"></component
     ></router-link>
   </aside>
 </template>
