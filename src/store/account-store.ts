@@ -1,5 +1,3 @@
-import AccountApi from "@/api/AccountApi.js";
-import RecurringApi from "@/api/RecurringApi";
 import { reactive, readonly, computed, ComputedRef } from "vue";
 import { realm } from "@/realm";
 
@@ -85,17 +83,44 @@ class AccountStore {
         {
           $lookup: {
             from: "recurring",
-            localField: "_id",
-            foreignField: "account_id",
             as: "recurring",
+            let: { accountId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$account_id", "$$accountId"] },
+                      { $ne: ["$deleted", true] },
+                    ],
+                  },
+                },
+              },
+            ],
           },
         },
         {
           $lookup: {
             from: "transactions",
-            localField: "_id",
-            foreignField: "account_id",
             as: "transactions",
+            let: { accountId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$account_id", "$$accountId"] },
+                      { $ne: ["$deleted", true] },
+                    ],
+                  },
+                },
+              },
+              {
+                $sort: {
+                  date: 1,
+                },
+              },
+            ],
           },
         },
       ]);
@@ -313,7 +338,7 @@ class AccountStore {
       },
       {
         $set: {
-          deleted: false,
+          deleted: true,
         },
       }
     );
@@ -330,7 +355,7 @@ class AccountStore {
       },
       {
         $set: {
-          deleted: false,
+          deleted: true,
         },
       }
     );
