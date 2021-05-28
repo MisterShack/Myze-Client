@@ -30,7 +30,7 @@
           <li
             class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
           >
-            {{ date }}
+            {{ dayjs(date).format("MMMM DD") }}
           </li>
           <li
             v-for="(transaction, key) in transactions"
@@ -42,10 +42,15 @@
               >
                 <span>{{ transaction.vendor.name }}</span>
                 <span class="text-lg">{{
-                  new Intl.NumberFormat("en-CA", {
-                    style: "currency",
-                    currency: "CAD",
-                  }).format(transaction.amount / 100)
+                  new Currency(
+                    transaction.amount /
+                      ((transaction.type === "DEBIT" &&
+                        account.type === "CREDIT_CARD") ||
+                      (transaction.type === "CREDIT" &&
+                        account.type !== "CREDIT_CARD")
+                        ? 100
+                        : -100)
+                  ).format()
                 }}</span>
               </li>
             </ul>
@@ -69,7 +74,7 @@
           <li
             class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
           >
-            {{ date }}
+            {{ dayjs(date).format("MMMM DD") }}
           </li>
           <li>
             <ul class="mb-5">
@@ -160,6 +165,7 @@
         state,
         latestTransactions,
         Currency,
+        dayjs,
       };
     },
   };

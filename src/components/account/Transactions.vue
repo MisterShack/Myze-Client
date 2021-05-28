@@ -32,7 +32,7 @@
         <li
           class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
         >
-          {{ date }}
+          {{ dayjs(date).format("MMMM DD") }}
         </li>
         <li class="mb-5">
           <ul>
@@ -76,9 +76,10 @@
 </template>
 
 <script>
-  import { reactive, computed, watch } from "vue";
+  import { reactive, computed } from "vue";
   import { getVendors } from "@/store/vendor";
   import Currency from "@/helpers/Currency";
+  import dayjs from "dayjs";
 
   import Panel from "@/components/Panel.vue";
   import AddTransactionForm from "@/components/account/AddTransactionForm.vue";
@@ -133,6 +134,7 @@
         transactionsByDate,
         openTransactionPanel,
         Currency,
+        dayjs,
       };
     },
   };
