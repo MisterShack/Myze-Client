@@ -42,10 +42,12 @@
       <Transactions
         v-if="state.activeNavigation === 'transactions'"
         :account="state.account"
+        :vendors="state.vendors"
       />
       <Recurring
         v-if="state.activeNavigation === 'recurring'"
         :account="state.account"
+        :vendors="state.vendors"
       />
 
       <Settings
@@ -89,6 +91,7 @@
 
       accountStore.loadAccounts().then(() => {
         state.account = accountStore.getAccount(route.params.id);
+        state.vendors = accountStore.state.vendors;
         state.loading = false;
       });
 

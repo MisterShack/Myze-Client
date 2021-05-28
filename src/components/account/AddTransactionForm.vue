@@ -13,7 +13,7 @@
   <FormField>
     <template #label>Vendor</template>
     <VendorDropdown
-      :vendors="state.vendors"
+      :vendors="vendors"
       v-model:selectedVendor="state.transaction.vendor"
     />
   </FormField>
@@ -85,7 +85,6 @@
 
 <script>
   import { reactive } from "vue";
-  import { getVendors } from "@/store/vendor";
   import { accountStore } from "@/store/account-store.ts";
   import Currency from "@/helpers/Currency";
 
@@ -102,6 +101,10 @@
         type: Object,
         required: true,
       },
+      vendors: {
+        type: Object,
+        required: true,
+      },
       transactionId: String,
     },
     components: {
@@ -115,7 +118,6 @@
     emits: ["close"],
     setup(props, { emit }) {
       const state = reactive({
-        vendors: getVendors(),
         transaction: getDefaultTransaction(),
         typeOptions: {
           DEBIT: "Expense",
@@ -153,7 +155,6 @@
         emit("close");
       }
 
-      // TODO - Move to a service/store file
       async function save() {
         await accountStore.saveTransaction(state.transaction);
         emit("close");

@@ -70,6 +70,7 @@
     <template v-slot="scope">
       <AddRecurringForm
         :account="account"
+        :vendors="vendors"
         :recurringId="state.recurringToEdit"
         @form-saved="state.annualCashFlow = getAnnualCashFlow()"
         @close="scope.close"
@@ -93,6 +94,9 @@
   export default {
     props: {
       account: {
+        required: true,
+      },
+      vendors: {
         required: true,
       },
     },

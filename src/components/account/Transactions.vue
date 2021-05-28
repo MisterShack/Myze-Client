@@ -68,6 +68,7 @@
     <template v-slot="scope">
       <AddTransactionForm
         :account="account"
+        :vendors="vendors"
         :transactionId="state.transactionToEdit"
         @close="scope.close"
       />
@@ -77,7 +78,6 @@
 
 <script>
   import { reactive, computed } from "vue";
-  import { getVendors } from "@/store/vendor";
   import Currency from "@/helpers/Currency";
   import dayjs from "dayjs";
 
@@ -87,6 +87,10 @@
   export default {
     props: {
       account: {
+        required: true,
+      },
+      vendors: {
+        type: Object,
         required: true,
       },
       notifications: {
@@ -99,7 +103,6 @@
       const state = reactive({
         transactionToEdit: null,
         showTransactionPanel: false,
-        vendors: getVendors(),
         transactions: props.account.transactions,
       });
 
