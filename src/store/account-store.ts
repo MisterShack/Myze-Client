@@ -13,6 +13,7 @@ class AccountStore {
       accounts: {},
       accountsByType: null,
       groupedTransactionsByAccount: {},
+      vendors: [],
     });
 
     this.accountTypes = readonly({
@@ -144,6 +145,19 @@ class AccountStore {
 
         this.state.accounts[account._id.toString()] = account;
       });
+
+      const vendors = await realm.collections.vendors.aggregate([
+        {
+          $match: {
+            userId: realm.currentUser.value.id,
+          },
+        },
+      ]);
+
+      this.state.vendors = vendors.map((v) => ({
+        id: v._id.toString(),
+        name: v.name,
+      }));
 
       this.state.initialized = true;
     }

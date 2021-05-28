@@ -22,7 +22,7 @@
       >
         <li
           v-for="(vendor, idx) in state.filteredVendors"
-          :key="vendor.name"
+          :key="vendor.id"
           role="option"
           class="cursor-default select-none relative py-2 px-3"
           :class="

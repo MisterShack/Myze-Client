@@ -42,7 +42,7 @@
   <FormField>
     <template #label>Vendor</template>
     <VendorDropdown
-      :vendors="state.vendors"
+      :vendors="vendors"
       v-model:selectedVendor="state.recurring.vendor"
     />
   </FormField>
@@ -91,7 +91,6 @@
 
 <script>
   import { reactive } from "vue";
-  import { getVendors } from "@/store/vendor";
   import { accountStore } from "@/store/account-store.ts";
   import Currency from "@/helpers/Currency";
   import dayjs from "dayjs";
@@ -108,6 +107,10 @@
         type: Object,
         required: true,
       },
+      vendors: {
+        type: Object,
+        required: true,
+      },
       recurringId: String,
     },
     components: {
@@ -120,7 +123,6 @@
     emits: ["close", "form-saved"],
     setup(props, { emit }) {
       const state = reactive({
-        vendors: getVendors(),
         recurring: getDefaultRecurring(),
         interval_options: {
           "1W": "Every Week",
