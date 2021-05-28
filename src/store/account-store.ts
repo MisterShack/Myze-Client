@@ -19,6 +19,7 @@ class AccountStore {
 
     this.accountTypes = readonly({
       CHEQUING: "Chequing",
+      CREDIT_CARD: "Credit Card",
       SAVINGS: "Savings",
       TFSA: "Tax-Free Savings Account",
       MORTGAGE: "Mortgages",

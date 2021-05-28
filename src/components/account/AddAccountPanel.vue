@@ -73,6 +73,7 @@
 
       const accountTypes = {
         CHEQUING: "Chequing",
+        CREDIT_CARD: "Credit Card",
         SAVINGS: "Savings",
         TFSA: "Tax-Free Savings",
         LOAN: "Loan",
