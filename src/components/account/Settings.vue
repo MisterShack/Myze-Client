@@ -18,7 +18,7 @@
       const router = useRouter();
 
       async function deleteAccount() {
-        await accountStore.deleteAccount(props.account.id);
+        await accountStore.deleteAccount(props.account._id);
         router.push(`/accounts`);
       }
 

@@ -32,7 +32,7 @@
         <li
           class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
         >
-          {{ date }}
+          {{ dayjs(date).format("MMMM DD") }}
         </li>
         <li class="mb-5">
           <ul>
@@ -49,16 +49,10 @@
                 </p>
               </div>
               <span v-if="transaction.type === 'DEBIT'" class="text-lg">{{
-                new Intl.NumberFormat("en-CA", {
-                  style: "currency",
-                  currency: "CAD",
-                }).format((transaction.amount / 100) * -1)
+                new Currency(transaction.amount / -100).format()
               }}</span>
               <span v-else class="text-lg">{{
-                new Intl.NumberFormat("en-CA", {
-                  style: "currency",
-                  currency: "CAD",
-                }).format(transaction.amount / 100)
+                new Currency(transaction.amount / 100).format()
               }}</span>
             </li>
           </ul>
@@ -82,8 +76,10 @@
 </template>
 
 <script>
-  import { reactive, computed, watch } from "vue";
+  import { reactive, computed } from "vue";
   import { getVendors } from "@/store/vendor";
+  import Currency from "@/helpers/Currency";
+  import dayjs from "dayjs";
 
   import Panel from "@/components/Panel.vue";
   import AddTransactionForm from "@/components/account/AddTransactionForm.vue";
@@ -137,6 +133,8 @@
         sortedTransactionDates,
         transactionsByDate,
         openTransactionPanel,
+        Currency,
+        dayjs,
       };
     },
   };

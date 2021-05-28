@@ -34,9 +34,9 @@
   <template v-else>
     <div class="grid grid-cols-1 gap-2 md:grid-cols-2 md:auto-rows-auto">
       <div
-        class="bg-white px-5 rounded-lg"
-        v-for="group in accountStore.state.accountsByType"
-        :key="group"
+        class="bg-white md:px-5 rounded-lg"
+        v-for="(group, accountType) in accountStore.state.accountsByType"
+        :key="accountType"
       >
         <div
           class="flex items-center justify-between text-light-blue-700  border-b border-light-blue-700 pb-1 border-opacity-30 pt-3"
@@ -46,10 +46,9 @@
           </span>
           <span>
             {{
-              new Intl.NumberFormat("en-CA", {
-                style: "currency",
-                currency: "CAD",
-              }).format(group.balance / 100)
+              new Currency(
+                group.balance / (accountType === "CREDIT_CARD" ? -100 : 100)
+              ).format()
             }}</span
           >
         </div>
@@ -65,10 +64,10 @@
             >
               <span>{{ account.name }}</span>
               {{
-                new Intl.NumberFormat("en-CA", {
-                  style: "currency",
-                  currency: "CAD",
-                }).format(account.current_balance / 100)
+                new Currency(
+                  account.current_balance /
+                    (account.type === "CREDIT_CARD" ? -100 : 100)
+                ).format()
               }}
             </router-link>
           </li>
@@ -91,6 +90,7 @@
   import Panel from "@/components/Panel.vue";
   import AddAccountPanel from "@/components/account/AddAccountPanel.vue";
   import { accountStore } from "@/store/account-store";
+  import Currency from "@/helpers/Currency";
 
   export default defineComponent({
     components: { MyzeButton, AddAccountPanel, Panel, PageHeader },
@@ -111,6 +111,7 @@
         state,
         accountStore,
         showAddAccountPanel,
+        Currency,
       };
     },
   });

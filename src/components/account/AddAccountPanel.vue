@@ -30,8 +30,9 @@
       step=".01"
       :value="state.newAccount.starting_balance / 100"
       @input="
-        state.newAccount.starting_balance =
-          Math.max($event.target.value, 0) * 100
+        state.newAccount.starting_balance = Currency.createFromString(
+          $event.target.value
+        ).amount
       "
     />
   </FormField>
@@ -48,6 +49,7 @@
   import SelectMenu from "@/components/forms/inputs/SelectMenu.vue";
   import { accountStore } from "@/store/account-store";
   import { useRouter } from "vue-router";
+  import Currency from "@/helpers/Currency";
 
   export default {
     components: { MyzeButton, FormField, SelectMenu },
@@ -71,6 +73,7 @@
 
       const accountTypes = {
         CHEQUING: "Chequing",
+        CREDIT_CARD: "Credit Card",
         SAVINGS: "Savings",
         TFSA: "Tax-Free Savings",
         LOAN: "Loan",
@@ -89,6 +92,7 @@
         accountTypes,
         addAccount,
         formValidated,
+        Currency,
       };
     },
   };

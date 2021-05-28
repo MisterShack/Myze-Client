@@ -36,7 +36,9 @@
           name="StartingBalance"
           :value="state.transaction.amount / 100"
           @input="
-            state.transaction.amount = Math.max($event.target.value, 0) * 100
+            state.transaction.amount = Currency.createFromString(
+              $event.target.value
+            ).amount
           "
         />
       </div>
@@ -85,6 +87,7 @@
   import { reactive } from "vue";
   import { getVendors } from "@/store/vendor";
   import { accountStore } from "@/store/account-store.ts";
+  import Currency from "@/helpers/Currency";
 
   import Collapsible from "@/components/forms/Collapsible.vue";
   import DatePicker from "@/components/forms/inputs/DatePicker.vue";
@@ -161,6 +164,7 @@
         remove,
         save,
         selectDate,
+        Currency,
       };
     },
   };

@@ -3,26 +3,6 @@
     <p>Loading...</p>
   </div>
   <template v-else>
-    <router-link
-      class="flex items-center text-gray-600 cursor-pointer mb-5"
-      to="/overview"
-    >
-      <svg
-        class="h-4"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M10 19l-7-7m0 0l7-7m-7 7h18"
-        />
-      </svg>
-      <span class="pl-1">Back</span>
-    </router-link>
     <div
       class="flex flex-wrap justify-center pb-10 items-center md:justify-between"
     >
@@ -30,10 +10,10 @@
         <h1 class="font-thin text-lg">{{ state.account.name }}</h1>
         <h3 class="text-4xl text-light-blue-700 md:text-3xl">
           {{
-            new Intl.NumberFormat("en-CA", {
-              style: "currency",
-              currency: "CAD",
-            }).format(state.account.current_balance / 100)
+            new Currency(
+              state.account.current_balance /
+                (state.account.type === "CREDIT_CARD" ? -100 : 100)
+            ).format()
           }}
         </h3>
       </div>
@@ -85,6 +65,7 @@
   import Transactions from "@/components/account/Transactions.vue";
   import Recurring from "@/components/account/Recurring.vue";
   import Settings from "@/components/account/Settings.vue";
+  import Currency from "@/helpers/Currency";
 
   export default {
     components: { Overview, Transactions, Recurring, Settings },
@@ -114,6 +95,7 @@
       return {
         state,
         navLinks,
+        Currency,
       };
     },
   };

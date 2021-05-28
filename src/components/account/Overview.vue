@@ -12,13 +12,15 @@
 
   <div
     v-else
-    class="flex space-y-5 flex-col lg:space-x-5 lg:flex-row lg:justify-between lg:items-baseline"
+    class="flex space-y-5 flex-col lg:space-x-5 lg:flex-row lg:justify-between lg:items-baseline mb-10"
   >
-    <div class="bg-white h-auto lg:flex-1 shadow-md rounded-lg p-6 pb-0">
-      <h2 class="text-lg tracking-wide mb-3">Upcoming</h2>
+    <div
+      class="bg-yellow-50 h-auto lg:flex-1 border border-yellow-300 pt-4 px-6"
+    >
+      <h2 class="text-lg text-yellow-900 tracking-wide mb-3">Upcoming</h2>
       <p
         v-if="Object.values(state.futureTransactions).length === 0"
-        class="text-center pt-5 pb-10 text-gray-500"
+        class="text-center pt-5 pb-10 text-yellow-900"
       >
         No upcoming transactions!
       </p>
@@ -28,9 +30,9 @@
           :key="date"
         >
           <li
-            class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
+            class="text-yellow-800 text-sm border-b border-yellow-800 pb-1 border-opacity-30"
           >
-            {{ date }}
+            {{ dayjs(date).format("MMMM DD") }}
           </li>
           <li
             v-for="(transaction, key) in transactions"
@@ -42,10 +44,15 @@
               >
                 <span>{{ transaction.vendor.name }}</span>
                 <span class="text-lg">{{
-                  new Intl.NumberFormat("en-CA", {
-                    style: "currency",
-                    currency: "CAD",
-                  }).format(transaction.amount / 100)
+                  new Currency(
+                    transaction.amount /
+                      ((transaction.type === "DEBIT" &&
+                        account.type === "CREDIT_CARD") ||
+                      (transaction.type === "CREDIT" &&
+                        account.type !== "CREDIT_CARD")
+                        ? 100
+                        : -100)
+                  ).format()
                 }}</span>
               </li>
             </ul>
@@ -53,8 +60,10 @@
         </template>
       </ul>
     </div>
-    <div class="bg-white h-auto lg:flex-1 shadow-md rounded-lg p-6 pb-0">
-      <h2 class="text-lg tracking-wide mb-3">Latest</h2>
+    <div
+      class="bg-light-blue-50 h-auto lg:flex-1 border border-blue-200 pt-4 px-6"
+    >
+      <h2 class="text-lg text-light-blue-900 tracking-wide mb-3">Latest</h2>
       <p
         v-if="Object.keys(state.account.transactions).length === 0"
         class="text-center pt-5 pb-10 text-gray-500"
@@ -69,14 +78,14 @@
           <li
             class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
           >
-            {{ date }}
+            {{ dayjs(date).format("MMMM DD") }}
           </li>
           <li>
             <ul class="mb-5">
               <li
                 v-for="transaction in transactions"
                 :key="transaction._id.toString()"
-                class="py-1 mb-2 flex items-center justify-between text-gray-600"
+                class="py-1 flex items-center justify-between text-gray-600"
               >
                 <span>{{ transaction.vendor.name }}</span>
                 <span class="text-lg">{{
@@ -98,6 +107,7 @@
   import { computed, reactive, watch } from "vue";
 
   import dayjs from "dayjs";
+  import Currency from "@/helpers/Currency";
   import RecurringService from "@/services/RecurringService.ts";
 
   export default {
@@ -139,10 +149,9 @@
         let latestTransactions = {};
         let numberOfTransactions = 5;
 
-        let transactions = Object.values(props.account.transactions).slice(
-          0,
-          numberOfTransactions
-        );
+        let transactions = Object.values(props.account.transactions)
+          .reverse()
+          .slice(0, numberOfTransactions);
 
         transactions.forEach((t) => {
           if (!latestTransactions[t.date]) {
@@ -158,6 +167,8 @@
       return {
         state,
         latestTransactions,
+        Currency,
+        dayjs,
       };
     },
   };
