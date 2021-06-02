@@ -48,11 +48,16 @@
                   {{ transaction.description }}
                 </p>
               </div>
-              <span v-if="transaction.type === 'DEBIT'" class="text-lg">{{
-                new Currency(transaction.amount / -100).format()
-              }}</span>
-              <span v-else class="text-lg">{{
-                new Currency(transaction.amount / 100).format()
+              <span class="text-lg">{{
+                new Currency(
+                  transaction.amount /
+                    ((account.type === "CREDIT_CARD" &&
+                      transaction.type === "CREDIT") ||
+                    (account.type !== "CREDIT_CARD" &&
+                      transaction.type === "DEBIT")
+                      ? -100
+                      : 100)
+                ).format()
               }}</span>
             </li>
           </ul>
