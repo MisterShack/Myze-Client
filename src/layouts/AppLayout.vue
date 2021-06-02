@@ -1,6 +1,6 @@
 <template>
-  <main class="min-h-screen max-w-7xl">
-    <div class="pt-10 px-4 pb-12 md:px-10 md:pl-28">
+  <main class="min-h-screen bg-white">
+    <div class="pt-10 px-4 pb-12 md:px-10 md:pl-28 max-w-7xl">
       <Sidebar v-show="user" />
       <div>
         <slot />

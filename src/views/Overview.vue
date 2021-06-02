@@ -1,5 +1,5 @@
 <template>
-  <PageHeader class=" inline-block pb-5">
+  <PageHeader class="inline-block pb-5">
     Overview
   </PageHeader>
   <p v-if="state.loading" class="text-gray-500">Loading...</p>
@@ -15,36 +15,34 @@
     </p>
   </div>
   <template v-else>
-    <div>
-      <p class="text-lg font-thin ">Available</p>
-      <p class="text-light-blue-700 text-4xl md:text-3xl">
+    <div class="my-5">
+      <p class="text-gray-800 text-4xl md:text-3xl">
         {{ new Currency(accountStore.availableBalance.value / 100).format() }}
       </p>
+      <p class="text-sm text-gray-500">Available</p>
     </div>
-    <div></div>
-    <div
-      class="bg-light-blue-50 h-auto lg:flex-1 border border-blue-200 pt-4 px-6 my-5"
-    >
-      <h2 class="text-lg text-light-blue-900 tracking-wide mb-3">Latest</h2>
-      <ul class="my-6">
+
+    <div class="h-auto lg:w-2/3 lg:flex-1 pt-4 my-5">
+      <h2 class="text-2xl font-medium text-gray-800 mb-3">
+        Last Transactions
+      </h2>
+      <ul>
         <template
           v-for="(transactions, date) in latestTransactions"
           :key="date"
         >
-          <li
-            class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
-          >
+          <li class=" mt-5">
             {{ dayjs(date).format("MMMM DD") }}
           </li>
-          <li>
-            <ul class="mb-5">
+          <li class="border-b last:border-b-0">
+            <ul class="mb-5 border-gray-200">
               <li
                 v-for="t in transactions"
                 :key="t._id.toString()"
-                class="py-1 flex items-center justify-between text-gray-600"
+                class="py-3 my-2 flex items-center justify-between text-lg font-medium text-gray-700"
               >
                 <span>{{ t.vendor.name }}</span>
-                <span class="text-lg">{{
+                <span>{{
                   new Currency(
                     t.amount /
                       ((t.type === "DEBIT" &&

@@ -8,11 +8,17 @@ module.exports = {
       colors: {
         "light-blue": colors.lightBlue,
         cyan: colors.cyan,
+        ming: "#006D77",
+        "middle-blue-green": "#83C5BE",
+        "alice-blue": "#EDF6F9",
+        carmine: "#A44A3F",
+        salmon: "#F19C79",
       },
     },
   },
   variants: {
     extend: {
+      borderWidth: ["last"],
       animation: ["hover", "focus"],
     },
   },
