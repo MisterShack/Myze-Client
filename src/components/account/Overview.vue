@@ -11,13 +11,15 @@
   </div>
 
   <div
-    v-else
-    class="flex space-y-5 flex-col lg:space-x-5 lg:flex-row lg:justify-between lg:items-baseline mb-10"
+    class="flex space-y-5 lg:space-y-0 flex-col lg:space-x-5 lg:flex-row lg:justify-between lg:items-baseline mb-10"
   >
     <div
       class="bg-yellow-50 h-auto lg:flex-1 border border-yellow-300 pt-4 px-6"
     >
-      <h2 class="text-lg text-yellow-900 tracking-wide mb-3">Upcoming</h2>
+      <h2 class="text-lg text-yellow-900 tracking-wide mb-3">
+        Upcoming Transactions
+        <span class="text-xs text-gray-600">(Next four weeks)</span>
+      </h2>
       <p
         v-if="Object.values(state.futureTransactions).length === 0"
         class="text-center pt-5 pb-10 text-yellow-900"
@@ -25,17 +27,14 @@
         No upcoming transactions!
       </p>
       <ul v-else class="my-6">
-        <template
-          v-for="(transactions, date) in state.futureTransactions"
-          :key="date"
-        >
+        <template v-for="date in orderedFutureTransactionDates" :key="date">
           <li
             class="text-yellow-800 text-sm border-b border-yellow-800 pb-1 border-opacity-30"
           >
             {{ dayjs(date).format("MMMM DD") }}
           </li>
           <li
-            v-for="(transaction, key) in transactions"
+            v-for="(transaction, key) in state.futureTransactions[date]"
             :key="`${date}_${key}`"
           >
             <ul>
@@ -63,7 +62,9 @@
     <div
       class="bg-light-blue-50 h-auto lg:flex-1 border border-blue-200 pt-4 px-6"
     >
-      <h2 class="text-lg text-light-blue-900 tracking-wide mb-3">Latest</h2>
+      <h2 class="text-lg text-light-blue-900 tracking-wide mb-3">
+        Latest Transactions
+      </h2>
       <p
         v-if="Object.keys(state.account.transactions).length === 0"
         class="text-center pt-5 pb-10 text-gray-500"
@@ -89,10 +90,15 @@
               >
                 <span>{{ transaction.vendor.name }}</span>
                 <span class="text-lg">{{
-                  new Intl.NumberFormat("en-CA", {
-                    style: "currency",
-                    currency: "CAD",
-                  }).format(transaction.amount / 100)
+                  new Currency(
+                    transaction.amount /
+                      ((transaction.type === "DEBIT" &&
+                        account.type === "CREDIT_CARD") ||
+                      (transaction.type === "CREDIT" &&
+                        account.type !== "CREDIT_CARD")
+                        ? 100
+                        : -100)
+                  ).format()
                 }}</span>
               </li>
             </ul>
@@ -132,6 +138,10 @@
         ),
       });
 
+      const orderedFutureTransactionDates = computed(() =>
+        Object.keys(state.futureTransactions).sort()
+      );
+
       watch(
         () => props.account,
         (account) => {
@@ -169,6 +179,7 @@
         latestTransactions,
         Currency,
         dayjs,
+        orderedFutureTransactionDates,
       };
     },
   };

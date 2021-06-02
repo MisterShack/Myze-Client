@@ -3,9 +3,7 @@
     <p>Loading...</p>
   </div>
   <template v-else>
-    <div
-      class="flex flex-wrap justify-center pb-10 items-center md:justify-between"
-    >
+    <div class="flex flex-wrap justify-centeritems-center md:justify-between">
       <div class="text-center mb-5 w-full md:text-left md:mb-0 md:w-auto">
         <h1 class="font-thin text-lg">{{ state.account.name }}</h1>
         <h3 class="text-4xl text-light-blue-700 md:text-3xl">
@@ -17,21 +15,39 @@
           }}
         </h3>
       </div>
-      <div class="flex space-x-4 items-center">
-        <template v-for="(label, key) in navLinks" :key="key">
-          <a
-            v-if="key === state.activeNavigation"
-            class="text-sm py-2  px-3 text-white bg-light-blue-700 rounded-md"
-            >{{ label }}</a
-          >
-          <a
-            v-else
-            class="text-sm p-2 px-3 cursor-pointer opacity-60 hover:opacity-100"
-            @click="state.activeNavigation = key"
-            >{{ label }}</a
-          >
-        </template>
+      <div class="text-center mb-5 w-full md:text-left md:mb-0 md:w-auto">
+        <h1 class="font-thin text-lg">
+          Est. Balance ({{
+            dayjs()
+              .add(4, "week")
+              .format("MMMM D")
+          }})
+        </h1>
+        <h3 class="text-4xl text-light-blue-700 md:text-3xl">
+          {{
+            new Currency(
+              futureBalance /
+                (state.account.type === "CREDIT_CARD" ? -100 : 100)
+            ).format()
+          }}
+        </h3>
       </div>
+    </div>
+
+    <div class="flex space-x-4 items-center my-10">
+      <template v-for="(label, key) in navLinks" :key="key">
+        <a
+          v-if="key === state.activeNavigation"
+          class="text-sm py-2  px-3 text-white bg-light-blue-700 rounded-md"
+          >{{ label }}</a
+        >
+        <a
+          v-else
+          class="text-sm p-2 px-3 cursor-pointer opacity-60 hover:opacity-100"
+          @click="state.activeNavigation = key"
+          >{{ label }}</a
+        >
+      </template>
     </div>
 
     <template v-if="!state.loading">
@@ -59,9 +75,11 @@
 </template>
 
 <script>
-  import { reactive, watch } from "vue";
+  import { computed, reactive, onMounted, onUnmounted } from "vue";
   import { useRoute } from "vue-router";
   import { accountStore } from "@/store/account-store.ts";
+  import RecurringService from "@/services/RecurringService.ts";
+  import dayjs from "dayjs";
 
   import Overview from "@/components/account/Overview.vue";
   import Transactions from "@/components/account/Transactions.vue";
@@ -71,6 +89,7 @@
 
   export default {
     components: { Overview, Transactions, Recurring, Settings },
+
     setup() {
       let route = useRoute();
 
@@ -78,8 +97,23 @@
         loading: true,
         activeNavigation: "overview",
         account: {},
+        vendors: {},
         notifications: [],
+        scrollY: 0,
+        futureTransactions: {},
       });
+
+      onMounted(() => {
+        window.addEventListener("scroll", handleScroll);
+      });
+
+      onUnmounted(() => {
+        window.removeEventListener("scroll", handleScroll);
+      });
+
+      function handleScroll() {
+        state.scrollY = window.scrollY;
+      }
 
       const navLinks = {
         overview: "Overview",
@@ -89,9 +123,27 @@
         settings: "Settings",
       };
 
+      const futureBalance = computed(() => {
+        let futureBalance = state.account.current_balance;
+
+        Object.values(state.futureTransactions).forEach((transactions) => {
+          transactions.forEach(
+            (t) => (futureBalance += t.amount * (t.type === "DEBIT" ? -1 : 1))
+          );
+        });
+
+        return futureBalance;
+      });
+
       accountStore.loadAccounts().then(() => {
         state.account = accountStore.getAccount(route.params.id);
         state.vendors = accountStore.state.vendors;
+        state.futureTransactions = RecurringService.generateFutureTransactions(
+          state.account._id.toString(),
+          dayjs()
+            .add(4, "week")
+            .format("YYYY-MM-DD")
+        );
         state.loading = false;
       });
 
@@ -99,6 +151,8 @@
         state,
         navLinks,
         Currency,
+        dayjs,
+        futureBalance,
       };
     },
   };
