@@ -18,7 +18,15 @@
     >
       <h2 class="text-lg text-yellow-900 tracking-wide mb-3">
         Upcoming Transactions
-        <span class="text-xs text-gray-600">(Next four weeks)</span>
+        <span class="text-xs text-gray-600"
+          >(Before
+          {{
+            dayjs()
+              .add(4, "week")
+              .add(1, "day")
+              .format("MMMM D")
+          }})</span
+        >
       </h2>
       <p
         v-if="Object.values(state.futureTransactions).length === 0"
