@@ -21,9 +21,7 @@
         {{ new Currency(accountStore.availableBalance.value / 100).format() }}
       </p>
     </div>
-    <div>
-      
-    </div>
+    <div></div>
     <div
       class="bg-light-blue-50 h-auto lg:flex-1 border border-blue-200 pt-4 px-6 my-5"
     >
@@ -118,7 +116,6 @@
           latestTransactionsByDate[t.date].push(t);
         });
 
-        console.log(latestTransactionsByDate);
         return latestTransactionsByDate;
       });
 
