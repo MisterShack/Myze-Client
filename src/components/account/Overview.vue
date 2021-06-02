@@ -31,7 +31,7 @@
           <li
             class="text-yellow-800 text-sm border-b border-yellow-800 pb-1 border-opacity-30"
           >
-            {{ dayjs(date).format("MMMM DD") }}
+            {{ dayjs(date).format("MMMM D") }}
           </li>
           <li
             v-for="(transaction, key) in state.futureTransactions[date]"
@@ -79,7 +79,7 @@
           <li
             class="text-light-blue-700 text-sm border-b border-light-blue-700 pb-1 border-opacity-30"
           >
-            {{ dayjs(date).format("MMMM DD") }}
+            {{ dayjs(date).format("MMMM D") }}
           </li>
           <li>
             <ul class="mb-5">
