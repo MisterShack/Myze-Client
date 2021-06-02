@@ -32,47 +32,43 @@
     </p>
   </div>
   <template v-else>
-    <div class="grid grid-cols-1 gap-2 md:grid-cols-2 md:auto-rows-auto">
-      <div
-        class="bg-white md:px-5 rounded-lg"
-        v-for="(group, accountType) in accountStore.state.accountsByType"
-        :key="accountType"
-      >
-        <div
-          class="flex items-center justify-between text-light-blue-700  border-b border-light-blue-700 pb-1 border-opacity-30 pt-3"
+    <div
+      class="w-full lg:w-2/3 border-b last:border-b-0"
+      v-for="(group, accountType) in accountStore.state.accountsByType"
+      :key="accountType"
+    >
+      <div class="flex items-center justify-between pt-3 text-gray-500">
+        <span>
+          {{ group.label }}
+        </span>
+        <span>
+          {{
+            new Currency(
+              group.balance / (accountType === "CREDIT_CARD" ? -100 : 100)
+            ).format()
+          }}</span
         >
-          <span class="font-normal tracking-wider">
-            {{ group.label }}
-          </span>
-          <span>
+      </div>
+      <ul>
+        <li
+          v-for="account in group.accounts"
+          :key="account.id"
+          class="py-3 text-lg font-medium text-gray-700"
+        >
+          <router-link
+            class="flex justify-between py-3 items-center"
+            :to="`/accounts/${account._id.toString()}`"
+          >
+            <span>{{ account.name }}</span>
             {{
               new Currency(
-                group.balance / (accountType === "CREDIT_CARD" ? -100 : 100)
+                account.current_balance /
+                  (account.type === "CREDIT_CARD" ? -100 : 100)
               ).format()
-            }}</span
-          >
-        </div>
-        <ul>
-          <li
-            v-for="account in group.accounts"
-            :key="account.id"
-            class="w-full "
-          >
-            <router-link
-              class="flex justify-between py-3 items-center"
-              :to="`/accounts/${account._id.toString()}`"
-            >
-              <span>{{ account.name }}</span>
-              {{
-                new Currency(
-                  account.current_balance /
-                    (account.type === "CREDIT_CARD" ? -100 : 100)
-                ).format()
-              }}
-            </router-link>
-          </li>
-        </ul>
-      </div>
+            }}
+          </router-link>
+        </li>
+      </ul>
     </div>
   </template>
 
