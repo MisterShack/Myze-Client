@@ -12,11 +12,10 @@
 <script>
   import { computed } from "vue";
   import Sidebar from "@/components/Sidebar.vue";
-  import BottomNavbar from "@/components/BottomNavbar.vue";
   import { realm } from "@/realm";
 
   export default {
-    components: { BottomNavbar, Sidebar },
+    components: { Sidebar },
 
     setup() {
       const user = computed(() => !!realm.currentUser.value);

@@ -1,21 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { realm } from "@/realm";
 
-const Login = () => import("@/views/auth/Login.vue");
-const Signup = () => import("@/views/auth/Signup.vue");
-const Logout = () => import("@/views/auth/Logout.vue");
-const Overview = () => import("@/views/Overview.vue");
-const Accounts = () => import("@/views/Accounts.vue");
-const Profile = () => import("@/views/Profile.vue");
-const Settings = () => import("@/views/Settings.vue");
-const Account = () => import("@/views/Account.vue");
-
 const routes = [
   {
     path: "/",
     alias: "/login",
     name: "Login",
-    component: Login,
+    component: () => import("@/views/auth/Login.vue"),
     meta: {
       public: "strict",
     },
@@ -23,7 +14,7 @@ const routes = [
   {
     path: "/signup",
     name: "Signup",
-    component: Signup,
+    component: () => import("@/views/auth/Signup.vue"),
     meta: {
       public: "strict",
     },
@@ -31,32 +22,37 @@ const routes = [
   {
     path: "/logout",
     name: "Logout",
-    component: Logout,
+    component: () => import("@/views/auth/Logout.vue"),
   },
   {
     path: "/overview",
     name: "Overview",
-    component: Overview,
+    component: () => import("@/views/Overview.vue"),
   },
   {
     path: "/accounts",
     name: "Accounts",
-    component: Accounts,
-  },
-  {
-    path: "/profile",
-    name: "Profile",
-    component: Profile,
-  },
-  {
-    path: "/settings",
-    name: "Settings",
-    component: Settings,
+    component: () => import("@/views/Accounts.vue"),
   },
   {
     path: "/accounts/:id",
     name: "Account",
-    component: Account,
+    component: () => import("@/views/Account.vue"),
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    component: () => import("@/views/Profile.vue"),
+  },
+  {
+    path: "/analytics",
+    name: "Analytics",
+    component: () => import("@/views/Analytics.vue"),
+  },
+  {
+    path: "/settings",
+    name: "Settings",
+    component: () => import("@/views/Settings.vue"),
   },
 ];
 
