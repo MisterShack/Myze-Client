@@ -12,7 +12,7 @@
           ? 'text-white'
           : 'text-middle-blue-green hover:animate-pulse'
       "
-      ><component class="m-auto" :is="link.icon"></component
+      ><component class="m-auto h-6 w-6" :is="link.icon"></component
     ></router-link>
   </aside>
 </template>
@@ -20,13 +20,23 @@
 <script lang="ts">
   import { defineComponent, computed } from "vue";
   import { useRoute } from "vue-router";
-  import IconHome from "@/components/icons/IconHome.vue";
-  import IconCollection from "@/components/icons/IconCollection.vue";
-  import IconCog from "@/components/icons/IconCog.vue";
-  import IconLogout from "@/components/icons/IconLogout.vue";
+
+  import {
+    HomeIcon,
+    CogIcon,
+    LogoutIcon,
+    CollectionIcon,
+    ChartBarIcon,
+  } from "@heroicons/vue/outline/esm";
 
   export default defineComponent({
-    components: { IconHome, IconCollection, IconCog, IconLogout },
+    components: {
+      HomeIcon,
+      CogIcon,
+      LogoutIcon,
+      CollectionIcon,
+      ChartBarIcon,
+    },
     setup() {
       const route = useRoute();
       const currentRoute = computed(() => route.path);
@@ -35,22 +45,27 @@
         {
           text: "Overview",
           url: "/overview",
-          icon: IconHome,
+          icon: HomeIcon,
         },
         {
           text: "Accounts",
           url: "/accounts",
-          icon: IconCollection,
+          icon: CollectionIcon,
+        },
+        {
+          text: "Analytics",
+          url: "/analytics",
+          icon: ChartBarIcon,
         },
         {
           text: "Settings",
           url: "/settings",
-          icon: IconCog,
+          icon: CogIcon,
         },
         {
           text: "Log Out",
           url: "/logout",
-          icon: IconLogout,
+          icon: LogoutIcon,
         },
       ];
 
