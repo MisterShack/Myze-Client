@@ -9,6 +9,7 @@
   "dependencies": {
     "@headlessui/vue": "^1.2.0",
     "@heroicons/vue": "^1.0.1",
+    "@supabase/supabase-js": "^1.22.4",
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "dayjs": "^1.10.3",

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { realm } from "@/realm";
+import { supabase } from "@/supabase";
+import { store } from "@/store";
 
 const routes = [
   {
@@ -61,14 +62,23 @@ const router = createRouter({
   routes,
 });
 
+store.user = supabase.auth.user();
+
+supabase.auth.onAuthStateChange((_, session) => {
+  store.user = session.user;
+  store.accounts = [];
+  store.vendors = [];
+  store.categories = [];
+  store.recurring = [];
+});
+
 function validateRoutes(to, next) {
   const isPublicRoute = to.matched.some((record) => record.meta.public);
   const isOnlyPublicRoute = to.matched.some(
     (record) => record.meta.public === "strict"
   );
-  const userIsAuthenticated = !!realm.currentUser.value;
 
-  console.log(userIsAuthenticated);
+  const userIsAuthenticated = !!store.user?.id;
 
   // If not a public route and the user isn't authenticated, redirect to login
   if (!isPublicRoute && !userIsAuthenticated) {

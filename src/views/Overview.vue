@@ -2,7 +2,7 @@
   <PageHeader class="inline-block pb-5">
     Overview
   </PageHeader>
-  <p v-if="state.loading" class="text-gray-500">Loading...</p>
+  <p v-if="loading" class="text-gray-500">Loading...</p>
   <div
     v-else-if="Object.keys(accountStore.state.accountsByType).length === 0"
     class="mt-20 text-center text-xl text-gray-600"
@@ -65,74 +65,92 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, computed } from "vue";
+  import { defineComponent, computed, ref, onMounted } from "vue";
+  import { supabase } from "@/supabase";
+  import { store } from "@/store";
   import dayjs from "dayjs";
-  import { reactive } from "vue";
-  import { accountStore } from "@/store/account-store";
   import Currency from "@/helpers/Currency";
   import PageHeader from "@/components/PageHeader.vue";
 
   export default defineComponent({
     components: { PageHeader },
     setup() {
-      const state = reactive({
-        loading: true,
-      });
+      const loading = ref(true);
 
-      accountStore.loadAccounts().then(() => {
-        state.loading = false;
-      });
+      async function getProfile() {
+        try {
+          loading.value = true;
 
-      const latestTransactions = computed(() => {
-        let latestTransactions = [];
-        let latestTransactionsByDate = {};
+          let { data, error, status } = await supabase.rpc("get_overview", {
+            user_id: store.user.id,
+          });
 
-        // Group the last five transactions for each account
-        Object.values(accountStore.state.accounts).forEach(
-          (a) =>
-            (latestTransactions = [
-              ...latestTransactions,
-              ...Object.values(a.transactions)
-                .reverse()
-                .slice(0, 5),
-            ])
-        );
+          if (error && status !== 406) throw error;
 
-        // Sort the transactions by date
-        latestTransactions.sort((a, b) => {
-          if (a.date === b.date) return 0;
-
-          return a.date < b.date ? 1 : -1;
-        });
-
-        // Group the transactions by date
-        latestTransactions.slice(0, 5).forEach((t) => {
-          if (!latestTransactionsByDate[t.date]) {
-            latestTransactionsByDate[t.date] = [];
+          if (data) {
+            console.log(data);
+            console.log(status);
           }
+        } catch (error) {
+          console.log(error.message);
+        } finally {
+          loading.value = false;
+        }
+      }
 
-          latestTransactionsByDate[t.date].push(t);
-        });
-
-        return latestTransactionsByDate;
+      onMounted(() => {
+        getProfile();
       });
 
-      const accountNamesById = computed(() => {
-        let accountNames = {};
+      // const latestTransactions = computed(() => {
+      //   let latestTransactions = [];
+      //   let latestTransactionsByDate = {};
 
-        Object.values(accountStore.state.accounts).forEach(
-          (a) => (accountNames[a._id.toString()] = a.name)
-        );
+      //   // Group the last five transactions for each account
+      //   Object.values(accountStore.state.accounts).forEach(
+      //     (a) =>
+      //       (latestTransactions = [
+      //         ...latestTransactions,
+      //         ...Object.values(a.transactions)
+      //           .reverse()
+      //           .slice(0, 5),
+      //       ])
+      //   );
 
-        return accountNames;
-      });
+      //   // Sort the transactions by date
+      //   latestTransactions.sort((a, b) => {
+      //     if (a.date === b.date) return 0;
+
+      //     return a.date < b.date ? 1 : -1;
+      //   });
+
+      //   // Group the transactions by date
+      //   latestTransactions.slice(0, 5).forEach((t) => {
+      //     if (!latestTransactionsByDate[t.date]) {
+      //       latestTransactionsByDate[t.date] = [];
+      //     }
+
+      //     latestTransactionsByDate[t.date].push(t);
+      //   });
+
+      //   return latestTransactionsByDate;
+      // });
+
+      // const accountNamesById = computed(() => {
+      //   let accountNames = {};
+
+      //   Object.values(accountStore.state.accounts).forEach(
+      //     (a) => (accountNames[a._id.toString()] = a.name)
+      //   );
+
+      //   return accountNames;
+      // });
 
       return {
-        state,
-        accountStore,
         Currency,
-        latestTransactions,
-        accountNamesById,
+        loading,
+        // latestTransactions,
+        // accountNamesById,
         dayjs,
       };
     },

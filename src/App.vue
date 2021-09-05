@@ -8,6 +8,7 @@
   import { useRoute } from "vue-router";
   import { computed } from "vue";
 
+
   import HomeLayout from "@/layouts/HomeLayout.vue";
   import AppLayout from "@/layouts/AppLayout.vue";
 
