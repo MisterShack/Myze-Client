@@ -2,96 +2,95 @@ import { createRouter, createWebHistory } from "vue-router";
 import { supabase } from "@/supabase";
 import { store } from "@/store";
 
+function loadPage(view) {
+  return () => {
+    import(`../views/${view}.vue`);
+  };
+}
+
 const routes = [
   {
     path: "/",
     alias: "/login",
     name: "Login",
-    component: () => import("@/views/auth/Login.vue"),
-    meta: {
-      public: "strict",
-    },
+    component: () => import("../views/auth/Login.vue"),
   },
   {
     path: "/signup",
     name: "Signup",
-    component: () => import("@/views/auth/Signup.vue"),
-    meta: {
-      public: "strict",
-    },
+    component: () => import("../views/auth/Signup.vue"),
   },
   {
     path: "/logout",
     name: "Logout",
-    component: () => import("@/views/auth/Logout.vue"),
-  },
-  {
-    path: "/overview",
-    name: "Overview",
-    component: () => import("@/views/Overview.vue"),
+    component: () => import("../views/auth/Logout.vue"),
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: "/accounts",
     name: "Accounts",
-    component: () => import("@/views/Accounts.vue"),
+    component: () => import("../views/Accounts.vue"),
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: "/accounts/:id",
     name: "Account",
-    component: () => import("@/views/Account.vue"),
+    component: () => import("../views/Account.vue"),
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: "/profile",
     name: "Profile",
-    component: () => import("@/views/Profile.vue"),
+    component: () => import("../views/Profile.vue"),
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: "/analytics",
     name: "Analytics",
-    component: () => import("@/views/Analytics.vue"),
+    component: () => import("../views/Analytics.vue"),
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: "/settings",
     name: "Settings",
-    component: () => import("@/views/Settings.vue"),
+    component: () => import("../views/Settings.vue"),
+    meta: {
+      requiresAuth: true,
+    },
   },
 ];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(),
   routes,
 });
 
 store.user = supabase.auth.user();
 
-supabase.auth.onAuthStateChange((_, session) => {
+supabase.auth.onAuthStateChange(async (_, session) => {
   store.user = session.user;
-  store.accounts = [];
-  store.vendors = [];
-  store.categories = [];
-  store.recurring = [];
+  await store.loadData();
 });
 
-function validateRoutes(to, next) {
-  const isPublicRoute = to.matched.some((record) => record.meta.public);
-  const isOnlyPublicRoute = to.matched.some(
-    (record) => record.meta.public === "strict"
-  );
+router.beforeEach((to) => {
+  const currentUser = store.user;
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
 
-  const userIsAuthenticated = !!store.user?.id;
-
-  // If not a public route and the user isn't authenticated, redirect to login
-  if (!isPublicRoute && !userIsAuthenticated) {
-    return next("/login");
-  } else if (userIsAuthenticated && isOnlyPublicRoute) {
-    return next("/overview");
+  if (requiresAuth && !currentUser) {
+    return "/login";
+  } else if (!requiresAuth && currentUser) {
+    return "/accounts";
   }
-
-  return next();
-}
-
-router.beforeEach((to, _, next) => {
-  validateRoutes(to, next);
 });
 
 export default router;
