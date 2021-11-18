@@ -4,7 +4,7 @@
     <input
       class="block w-full p-2 m:text-sm sm:leading-5 bg-white border border-gray-300 rounded-md "
       id="account_name"
-      v-model="state.newAccount.name"
+      v-model="newAccount.name"
     />
   </FormField>
 
@@ -12,8 +12,8 @@
     <template #label>Type</template>
     <SelectMenu
       :options="accountTypes"
-      :selectedKey="state.newAccount.type"
-      @select="state.newAccount.type = $event"
+      :selectedKey="newAccount.type"
+      @select="newAccount.type = $event"
     />
   </FormField>
 
@@ -28,48 +28,39 @@
       class="block w-full p-2 pl-6 md:text-sm sm:leading-5 bg-white border border-gray-300 rounded-md"
       type="number"
       step=".01"
-      :value="state.newAccount.starting_balance / 100"
+      :value="newAccount.starting_balance / 100"
       @input="
-        state.newAccount.starting_balance = Currency.createFromString(
+        newAccount.starting_balance = Currency.createFromString(
           $event.target.value
         ).amount
       "
     />
   </FormField>
 
-  <myze-button theme="Success" @click="addAccount()" :disabled="!formValidated"
-    >Add Account</myze-button
-  >
+  <myze-button theme="Success" @click="addAccount()">Add Account</myze-button>
 </template>
 
 <script>
-  import { computed, reactive } from "vue";
+  import { reactive } from "vue";
+  import { supabase } from "@/supabase";
+
   import MyzeButton from "@/components/MyzeButton.vue";
   import FormField from "@/components/forms/inputs/FormField.vue";
   import SelectMenu from "@/components/forms/inputs/SelectMenu.vue";
-  import { accountStore } from "@/store/account-store";
   import { useRouter } from "vue-router";
   import Currency from "@/helpers/Currency";
 
   export default {
     components: { MyzeButton, FormField, SelectMenu },
     setup() {
-      const state = reactive({
-        newAccount: {
-          name: "",
-          starting_balance: 0,
-          type: null,
-        },
+      const newAccount = reactive({
+        name: "",
+        starting_balance: 0,
+        users: [supabase.auth.user().id],
+        type: null,
       });
 
       const router = useRouter();
-
-      const formValidated = computed(() => {
-        return (
-          state.newAccount.name.length > 0 &&
-          state.newAccount.accountType !== null
-        );
-      });
 
       const accountTypes = {
         CHEQUING: "Chequing",
@@ -82,16 +73,20 @@
       };
 
       async function addAccount() {
+        newAccount.current_balance = newAccount.starting_balance;
+
         // Create the account using the API and redirect to the account page
-        const account = await accountStore.createAccount(state.newAccount);
-        router.push(`/accounts/${account._id.toString()}`);
+        const { data, error } = await supabase
+          .from("accounts")
+          .insert([newAccount]);
+
+        router.push(`/accounts/${data[0].id}`);
       }
 
       return {
-        state,
+        newAccount,
         accountTypes,
         addAccount,
-        formValidated,
         Currency,
       };
     },
