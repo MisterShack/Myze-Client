@@ -1,4 +1,4 @@
-#Myze
+# Myze
 
 ## What is Myze?
 Myze is simply describe as a self-directed financial tracker. Every piece of data is at the discretion of the user as it does not connect to your banking information for security reasons. 
