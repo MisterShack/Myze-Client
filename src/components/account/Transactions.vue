@@ -1,16 +1,4 @@
 <template>
-  <div
-    v-if="notifications.length > 0"
-    class="bg-blue-100 text-blue-900 shadow-md rounded-lg py-3 px-4 mb-5"
-  >
-    <p class="text-md font-bold">Recurring Suggestion</p>
-
-    <p class="text-sm">
-      We noticed that you have multiple transactions from David's Tea for
-      $15.99. Click here to make this a recurring transaction.
-    </p>
-  </div>
-
   <div class="bg-white shadow-md rounded-lg p-6">
     <div class="flex justify-between items-center">
       <h2 class="text-lg tracking-wide">Transactions</h2>
@@ -97,10 +85,6 @@
       vendors: {
         type: Object,
         required: true,
-      },
-      notifications: {
-        type: Array,
-        default: [],
       },
     },
     components: { Panel, AddTransactionForm },
