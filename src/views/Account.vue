@@ -100,21 +100,11 @@
         account: {},
         vendors: {},
         notifications: [],
-        scrollY: 0,
         futureTransactions: {},
       });
 
-      onMounted(() => {
-        window.addEventListener("scroll", handleScroll);
-      });
 
-      onUnmounted(() => {
-        window.removeEventListener("scroll", handleScroll);
-      });
 
-      function handleScroll() {
-        state.scrollY = window.scrollY;
-      }
 
       const futureBalance = computed(() => {
         let futureBalance = state.account.current_balance;
