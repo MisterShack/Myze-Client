@@ -79,6 +79,7 @@
   import { useRoute } from "vue-router";
   import { accountStore } from "@/store/account-store.ts";
   import RecurringService from "@/services/RecurringService.ts";
+  import { navLinks } from "@/helpers/Constants";
   import dayjs from "dayjs";
 
   import Overview from "@/components/account/Overview.vue";
@@ -114,14 +115,6 @@
       function handleScroll() {
         state.scrollY = window.scrollY;
       }
-
-      const navLinks = {
-        overview: "Overview",
-        transactions: "Transactions",
-        recurring: "Recurring",
-        analytics: "Analytics",
-        settings: "Settings",
-      };
 
       const futureBalance = computed(() => {
         let futureBalance = state.account.current_balance;
