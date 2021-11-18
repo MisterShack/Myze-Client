@@ -1,20 +1,12 @@
-import { accountStore } from "@/store/account-store";
 import dayjs from "dayjs";
 
 export default class RecurringService {
-  static generateFutureTransactions(
-    accountId: number,
-    endDate: string
-  ): { [key: string]: Array<Myze.NewTransaction> } {
-    let futureTransactions = {} as {
-      [key: string]: Array<Myze.NewTransaction>;
-    };
+  static generateFutureTransactions(recurringTransactions, endDate) {
+    let futureTransactions = {};
 
     // Grab the recurring records for the account.
-    let recurring = Object.values(
-      accountStore.getAccount(accountId).recurring
-    ).filter(
-      (recurring: Myze.Recurring) =>
+    let recurring = recurringTransactions.filter(
+      (recurring) =>
         (recurring.end_date === null || dayjs(recurring.end_date) > dayjs()) &&
         dayjs(recurring.start_date) < dayjs(endDate)
     );
@@ -73,28 +65,23 @@ export default class RecurringService {
     return futureTransactions;
   }
 
-  static generateFutureTransactionsForMultipleAccounts(
-    accountIds: Array<string>,
-    endDate: string
-  ): { [key: string]: Array<Myze.NewTransaction> } {
-    let futureTransactions = {} as {
-      [key: string]: Array<Myze.NewTransaction>;
-    };
+  static generateFutureTransactionsForMultipleAccounts(accountIds, endDate) {
+    let futureTransactions = {};
 
     let recurring = [];
 
-    accountIds.forEach((accountId) => {
-      // Grab the recurring records for the account.
-      let accountRecurring = Object.values(
-        accountStore.getAccount(accountId).recurring
-      ).filter(
-        (recurring: Myze.Recurring) =>
-          (recurring.end_date === null ||
-            dayjs(recurring.end_date) > dayjs()) &&
-          dayjs(recurring.start_date) < dayjs(endDate)
-      );
-      recurring = [...recurring, ...accountRecurring];
-    });
+    // accountIds.forEach((accountId) => {
+    //   // Grab the recurring records for the account.
+    //   let accountRecurring = Object.values(
+    //     accountStore.getAccount(accountId).recurring
+    //   ).filter(
+    //     (recurring) =>
+    //       (recurring.end_date === null ||
+    //         dayjs(recurring.end_date) > dayjs()) &&
+    //       dayjs(recurring.start_date) < dayjs(endDate)
+    //   );
+    //   recurring = [...recurring, ...accountRecurring];
+    // });
 
     for (let r of recurring) {
       let maxEndDate = dayjs(endDate);
@@ -150,20 +137,22 @@ export default class RecurringService {
     return futureTransactions;
   }
 
-  static generateAnnualCashFlow(accountId: String) {
+  static generateAnnualCashFlow(accountId) {
     let annualCashFlow = 0;
     const generateStart = dayjs().startOf("year");
     const generateEnd = dayjs().endOf("year");
 
+    let recurring = [];
+
     // Grab the recurring records for the account.
-    let recurring = Object.values(
-      accountStore.getAccount(accountId).recurring
-    ).filter(
-      (recurring) =>
-        (recurring.end_date === null ||
-          dayjs(recurring.end_date) > generateStart) &&
-        dayjs(recurring.start_date) < generateEnd
-    );
+    // let recurring = Object.values(
+    //   accountStore.getAccount(accountId).recurring
+    // ).filter(
+    //   (recurring) =>
+    //     (recurring.end_date === null ||
+    //       dayjs(recurring.end_date) > generateStart) &&
+    //     dayjs(recurring.start_date) < generateEnd
+    // );
 
     for (let r of recurring) {
       let maxEndDate = generateEnd;
