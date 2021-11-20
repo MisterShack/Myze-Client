@@ -97,11 +97,26 @@ export const store = reactive({
   },
   async loadData() {
     if (store.user) {
-      const { data: accounts, error: accountError } = await supabase
-        .from("accounts")
-        .select();
+      const { data: accounts, error: accountError } = await supabase.from(
+        "accounts"
+      ).select(`
+        *,
+        recurring (
+          *,
+          vendors (
+            id, name
+          )
+        )`);
 
       accounts.forEach((account) => {
+        const recurringTransactions = {};
+
+        account.recurring.forEach((recurring) => {
+          recurringTransactions[recurring.id] = recurring;
+        });
+
+        account.recurring = recurringTransactions;
+
         store.accounts[account.id] = account;
       });
 
