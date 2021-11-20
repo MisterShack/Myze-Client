@@ -136,15 +136,14 @@
           .from("transactions")
           .select(
             `
+            id,
             type,
             amount,
             account_id,
             date,
             description,
-            id,
-            vendors (
-              id, name
-            )
+            vendors (id, name),
+            categories(id, name)
           `
           )
           .eq("account_id", props.accountId);
