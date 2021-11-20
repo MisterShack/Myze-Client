@@ -164,7 +164,7 @@
       }
 
       async function removeRecurring() {
-        store.removeRecurring(props.recurringId);
+        await store.removeRecurring(recurring.value);
         emit("close");
       }
 
