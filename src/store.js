@@ -110,6 +110,7 @@ export const store = reactive({
         .eq("deleted", false);
 
       accounts.forEach((account) => {
+        account.recurring = {};
         store.accounts[account.id] = account;
       });
 
@@ -124,10 +125,6 @@ export const store = reactive({
         .eq("deleted", false);
 
       recurring.forEach((r) => {
-        if (!store.accounts[r.account_id].recurring) {
-          store.accounts[r.account_id].recurring = {};
-        }
-
         store.accounts[r.account_id].recurring[r.id] = r;
       });
 
