@@ -50,6 +50,7 @@
     </div>
 
     <template v-if="!loading">
+      <Overview v-if="activeNavigation === 'overview'" :account="account" />
       <Transactions
         v-if="activeNavigation === 'transactions'"
         :accountId="account.id"
@@ -63,7 +64,6 @@
         v-if="activeNavigation === 'recurring'"
         :accountId="account.id"
       />
-      <!-- <Overview v-if="activeNavigation === 'overview'" :account="account" /> -->
     </template>
   </template>
 </template>
@@ -83,14 +83,14 @@
   import RecurringService from "@/services/RecurringService.js";
 
   // Components
-  // import Overview from "@/components/account/Overview.vue";
+  import Overview from "@/components/account/Overview.vue";
   import Transactions from "@/components/account/Transactions.vue";
   import Recurring from "@/components/account/Recurring.vue";
   import Settings from "@/components/account/Settings.vue";
 
   export default {
     // components: { Overview, Transactions, Recurring, Settings },
-    components: { Transactions, Settings, Recurring },
+    components: { Transactions, Settings, Recurring, Overview },
 
     setup() {
       let route = useRoute();
