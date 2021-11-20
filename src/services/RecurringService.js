@@ -57,7 +57,7 @@ export default class RecurringService {
           description: r.description,
           type: r.type,
           amount: r.amount,
-          vendor: r.vendor,
+          vendors: r.vendors,
         });
       }
     }
