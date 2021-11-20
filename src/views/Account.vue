@@ -69,19 +69,24 @@
 </template>
 
 <script>
+  // Core
   import { computed, reactive, ref } from "vue";
   import { useRoute } from "vue-router";
   import { store } from "@/store";
-  import { navLinks } from "@/helpers/Constants";
-
-  import RecurringService from "@/services/RecurringService.js";
   import dayjs from "dayjs";
 
+  //helpers
+  import { navLinks } from "@/helpers/Constants";
+  import Currency from "@/helpers/Currency";
+
+  // Services
+  import RecurringService from "@/services/RecurringService.js";
+
+  // Components
   // import Overview from "@/components/account/Overview.vue";
   import Transactions from "@/components/account/Transactions.vue";
   import Recurring from "@/components/account/Recurring.vue";
   import Settings from "@/components/account/Settings.vue";
-  import Currency from "@/helpers/Currency";
 
   export default {
     // components: { Overview, Transactions, Recurring, Settings },
@@ -100,17 +105,15 @@
 
       const vendors = computed(() => store.vendors);
 
-      const futureTransactions = reactive({});
-
-      // futureTransactions = RecurringService.generateFutureTransactions(
-      //   account.id,
-      //   dayjs()
-      //     .add(4, "week")
-      //     .format("YYYY-MM-DD")
-      // );
-
       // Generate future transactions from recurring service
       const futureBalance = computed(() => {
+        const futureTransactions = RecurringService.generateFutureTransactions(
+          Object.values(account.value.recurring),
+          dayjs()
+            .add(4, "week")
+            .format("YYYY-MM-DD")
+        );
+
         let futureBalance = account.value.current_balance;
 
         Object.values(futureTransactions).forEach((transactions) => {
@@ -127,7 +130,6 @@
         activeNavigation,
         account,
         vendors,
-        futureTransactions,
         navLinks,
         Currency,
         dayjs,
