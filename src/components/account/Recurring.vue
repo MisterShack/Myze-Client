@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="state.annualCashFlow < 0"
+    v-if="annualCashFlow < 0"
     class="bg-yellow-100 text-yellow-900 shadow-md rounded-lg py-3 px-4 mb-5"
   >
     <p class="text-md font-bold">Careful!</p>
@@ -10,16 +10,15 @@
         new Intl.NumberFormat("en-CA", {
           style: "currency",
           currency: "CAD",
-        }).format(state.annualCashFlow / 100)
+        }).format(annualCashFlow / 100)
       }}
       with a monthly average of
       {{
         new Intl.NumberFormat("en-CA", {
           style: "currency",
           currency: "CAD",
-        }).format(state.annualCashFlow / 1200)
+        }).format(annualCashFlow / 1200)
       }}
-      Click here to find out how to increase your recurring cash flow.
     </p>
   </div>
 
@@ -30,49 +29,45 @@
         class="bg-green-100 py-2 px-4 text-xs font-semibold text-green-900 border border-green-500 border-opacity-20 hover:border-opacity-100 transition-all duration-300 ease-in-out rounded-md"
         @click="openRecurringPanel()"
       >
-        Add
+        Add Recurring
       </button>
     </div>
     <ul class="my-6">
-      <template
-        v-for="recurring in state.recurring"
-        :key="recurring._id.toString()"
-      >
+      <template v-for="r in account.recurring" :key="r.id">
         <li
           class="py-1 mb-2 flex items-center justify-between text-gray-600 cursor-pointer"
-          @click="openRecurringPanel(recurring._id.toString())"
+          @click="openRecurringPanel(r.id)"
         >
           <div>
-            <p>{{ recurring.vendor.name }}</p>
+            <p>{{ r.vendors.name }}</p>
             <p class="text-xs text-gray-400">
-              {{ getIntervalText(recurring) }}
+              {{ getIntervalText(r) }}
             </p>
           </div>
-          <span v-if="recurring.type === 'DEBIT'" class="text-lg">{{
+          <span v-if="r.type === 'DEBIT'" class="text-lg">{{
             new Intl.NumberFormat("en-CA", {
               style: "currency",
               currency: "CAD",
-            }).format((recurring.amount / 100) * -1)
+            }).format((r.amount / 100) * -1)
           }}</span>
           <span v-else class="text-lg">{{
             new Intl.NumberFormat("en-CA", {
               style: "currency",
               currency: "CAD",
-            }).format(recurring.amount / 100)
+            }).format(r.amount / 100)
           }}</span>
         </li>
       </template>
     </ul>
   </div>
 
-  <Panel v-model:active="state.showRecurringPanel">
+  <Panel v-model:active="showRecurringPanel">
     <template #title>Add Recurring</template>
     <template v-slot="scope">
       <AddRecurringForm
-        :account="account"
-        :vendors="vendors"
-        :recurringId="state.recurringToEdit"
-        @form-saved="state.annualCashFlow = getAnnualCashFlow()"
+        :accountId="account.id"
+        :recurringId="recurringToEdit"
+        @form-saved="refreshData"
         @close="scope.close"
       />
     </template>
@@ -80,12 +75,16 @@
 </template>
 
 <script>
-  /* Packages */
-  import { reactive, watch } from "vue";
+  // Core
+  import { ref, onMounted, computed } from "vue";
+  import { store } from "@/store";
   import dayjs from "dayjs";
 
-  /* Services */
-  import RecurringService from "@/services/RecurringService";
+  // Helpers
+  import { recurringTypes } from "@/helpers/Constants";
+
+  // Services
+  // import RecurringService from "@/services/RecurringService";
 
   /* Components */
   import Panel from "@/components/Panel.vue";
@@ -93,46 +92,30 @@
 
   export default {
     props: {
-      account: {
-        required: true,
-      },
-      vendors: {
+      accountId: {
+        type: Number,
         required: true,
       },
     },
     components: { Panel, AddRecurringForm },
     setup(props) {
-      const state = reactive({
-        showRecurringPanel: false,
-        recurring: props.account.recurring,
-        recurringToEdit: null,
-        annualCashFlow: getAnnualCashFlow(),
-      });
+      const showRecurringPanel = ref(false);
+      const recurringToEdit = ref(null);
+      const annualCashFlow = ref(getAnnualCashFlow());
+      const account = computed(() => store.accounts[props.accountId]);
 
-      watch(
-        () => props.account.recurring,
-        (recurring) => {
-          state.recurring = recurring;
-          state.annualCashFlow = getAnnualCashFlow();
-        }
-      );
-
-      function getAnnualCashFlow() {
-        return RecurringService.generateAnnualCashFlow(
-          props.account._id.toString()
-        );
+      async function refreshData() {
+        annualCashFlow.value = getAnnualCashFlow();
       }
 
-      const recurringTypes = {
-        "1W": "Every week",
-        "2W": "Every two weeks",
-        "1M": "Every month",
-        "1Y": "Every year",
-      };
+      function getAnnualCashFlow() {
+        // return RecurringService.generateAnnualCashFlow(accountId);
+        return 0;
+      }
 
       function openRecurringPanel(recurringId) {
-        state.recurringToEdit = recurringId;
-        state.showRecurringPanel = true;
+        recurringToEdit.value = recurringId;
+        showRecurringPanel.value = true;
       }
 
       function getIntervalText(recurring) {
@@ -157,7 +140,11 @@
       }
 
       return {
-        state,
+        account,
+        showRecurringPanel,
+        recurringToEdit,
+        annualCashFlow,
+        refreshData,
         openRecurringPanel,
         getIntervalText,
         getAnnualCashFlow,
