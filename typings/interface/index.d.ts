@@ -91,7 +91,4 @@ export interface AccountStoreState {
   groupedTransactionsByAccount: Object;
 }
 
-export interface RealmServiceState {
-  app: Realm.App;
-  user: Realm.User;
-}
+
