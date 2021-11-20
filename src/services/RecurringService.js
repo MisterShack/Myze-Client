@@ -137,22 +137,18 @@ export default class RecurringService {
     return futureTransactions;
   }
 
-  static generateAnnualCashFlow(accountId) {
+  static generateAnnualCashFlow(recurring) {
     let annualCashFlow = 0;
     const generateStart = dayjs().startOf("year");
     const generateEnd = dayjs().endOf("year");
 
-    let recurring = [];
-
     // Grab the recurring records for the account.
-    // let recurring = Object.values(
-    //   accountStore.getAccount(accountId).recurring
-    // ).filter(
-    //   (recurring) =>
-    //     (recurring.end_date === null ||
-    //       dayjs(recurring.end_date) > generateStart) &&
-    //     dayjs(recurring.start_date) < generateEnd
-    // );
+    recurring = recurring.filter(
+      (recurring) =>
+        (recurring.end_date === null ||
+          dayjs(recurring.end_date) > generateStart) &&
+        dayjs(recurring.start_date) < generateEnd
+    );
 
     for (let r of recurring) {
       let maxEndDate = generateEnd;

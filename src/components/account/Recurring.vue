@@ -84,7 +84,7 @@
   import { recurringTypes } from "@/helpers/Constants";
 
   // Services
-  // import RecurringService from "@/services/RecurringService";
+  import RecurringService from "@/services/RecurringService";
 
   /* Components */
   import Panel from "@/components/Panel.vue";
@@ -109,8 +109,10 @@
       }
 
       function getAnnualCashFlow() {
-        // return RecurringService.generateAnnualCashFlow(accountId);
-        return 0;
+        // Since the recurring is indexed by id, let's pass just the values
+        return RecurringService.generateAnnualCashFlow(
+          Object.values(account.value.recurring)
+        );
       }
 
       function openRecurringPanel(recurringId) {
