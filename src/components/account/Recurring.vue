@@ -1,9 +1,15 @@
 <template>
   <div
-    v-if="annualCashFlow < 0"
-    class="bg-yellow-100 text-yellow-900 shadow-md rounded-lg py-3 px-4 mb-5"
+    class=" shadow-md rounded-lg py-3 px-4 mb-5"
+    :class="
+      annualCashFlow > 0
+        ? `bg-blue-100 text-blue-900`
+        : `bg-yellow-100 text-yellow-900`
+    "
   >
-    <p class="text-md font-bold">Careful!</p>
+    <p class="text-md font-bold">
+      {{ annualCashFlow > 0 ? "Wooo!" : "Careful!" }}
+    </p>
     <p class="text-sm">
       Your annual recurring cash flow for this year is
       {{
@@ -11,13 +17,6 @@
           style: "currency",
           currency: "CAD",
         }).format(annualCashFlow / 100)
-      }}
-      with a monthly average of
-      {{
-        new Intl.NumberFormat("en-CA", {
-          style: "currency",
-          currency: "CAD",
-        }).format(annualCashFlow / 1200)
       }}
     </p>
   </div>
