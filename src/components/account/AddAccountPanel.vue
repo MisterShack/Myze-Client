@@ -76,11 +76,15 @@
         newAccount.current_balance = newAccount.starting_balance;
 
         // Create the account using the API and redirect to the account page
-        const { data, error } = await supabase
+        const { data: accountsInserted, error } = await supabase
           .from("accounts")
           .insert([newAccount]);
 
-        router.push(`/accounts/${data[0].id}`);
+        const insertedAccount = accountsInserted[0];
+
+        store.accounts[insertedAccount.id] = insertedAccount;
+
+        router.push(`/accounts/${insertedAccount.id}`);
       }
 
       return {
