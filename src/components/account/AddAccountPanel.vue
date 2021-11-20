@@ -62,7 +62,7 @@
       const newAccount = reactive({
         name: "",
         starting_balance: 0,
-        users: [supabase.auth.user().id],
+        users: [store.user.id],
         type: null,
       });
 
