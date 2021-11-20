@@ -41,15 +41,20 @@
 </template>
 
 <script>
+  // Core
   import { reactive } from "vue";
   import { supabase } from "@/supabase";
+  import { store } from "@/store";
+  import { useRouter } from "vue-router";
+
+  // helpers
+  import Currency from "@/helpers/Currency";
   import { accountTypes } from "@/helpers/Constants";
 
+  // Components
   import MyzeButton from "@/components/MyzeButton.vue";
   import FormField from "@/components/forms/inputs/FormField.vue";
   import SelectMenu from "@/components/forms/inputs/SelectMenu.vue";
-  import { useRouter } from "vue-router";
-  import Currency from "@/helpers/Currency";
 
   export default {
     components: { MyzeButton, FormField, SelectMenu },
