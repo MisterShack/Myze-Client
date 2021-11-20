@@ -67,7 +67,6 @@
       <AddRecurringForm
         :accountId="account.id"
         :recurringId="recurringToEdit"
-        @form-saved="refreshData"
         @close="scope.close"
       />
     </template>
@@ -76,7 +75,7 @@
 
 <script>
   // Core
-  import { ref, onMounted, computed } from "vue";
+  import { ref, computed, watch } from "vue";
   import { store } from "@/store";
   import dayjs from "dayjs";
 
@@ -101,12 +100,19 @@
     setup(props) {
       const showRecurringPanel = ref(false);
       const recurringToEdit = ref(null);
+      const account = computed(() => {
+        return store.accounts[props.accountId];
+      });
       const annualCashFlow = ref(getAnnualCashFlow());
-      const account = computed(() => store.accounts[props.accountId]);
 
-      async function refreshData() {
-        annualCashFlow.value = getAnnualCashFlow();
-      }
+      watch(
+        () => account.value.recurring,
+        () => {
+          console.log("her");
+          annualCashFlow.value = getAnnualCashFlow();
+        },
+        { deep: true }
+      );
 
       function getAnnualCashFlow() {
         // Since the recurring is indexed by id, let's pass just the values
@@ -146,7 +152,6 @@
         showRecurringPanel,
         recurringToEdit,
         annualCashFlow,
-        refreshData,
         openRecurringPanel,
         getIntervalText,
         getAnnualCashFlow,
