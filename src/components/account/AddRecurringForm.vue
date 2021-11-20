@@ -48,6 +48,14 @@
   </FormField>
 
   <FormField>
+    <template #label>Category</template>
+    <VendorDropdown
+      :vendors="categories"
+      v-model:selectedVendor="recurring.categories"
+    />
+  </FormField>
+
+  <FormField>
     <template #label>Amount</template>
     <div
       class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
@@ -137,10 +145,16 @@
 
       const vendors = computed(() => store.vendors);
 
+      const categories = computed(() => store.categories);
+
       function getDefaultRecurring() {
         return {
           account_id: props.accountId,
           vendors: {
+            id: null,
+            name: "",
+          },
+          categories: {
             id: null,
             name: "",
           },
@@ -176,6 +190,7 @@
         removeRecurring,
         Currency,
         vendors,
+        categories,
       };
     },
   };

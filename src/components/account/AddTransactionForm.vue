@@ -18,6 +18,14 @@
     />
   </FormField>
 
+  <FormField>
+    <template #label>Category</template>
+    <VendorDropdown
+      :vendors="categories"
+      v-model:selectedVendor="transaction.categories"
+    />
+  </FormField>
+
   <div class="flex -my-5">
     <FormField class="flex-1 mr-5">
       <template #label>Amount</template>
@@ -124,6 +132,7 @@
       const transaction = ref(getDefaultTransaction());
       const account = ref(store.accounts[props.accountId]);
       const vendors = ref(store.vendors);
+      const categories = ref(store.categories);
 
       function getDefaultTransaction() {
         return {
@@ -132,6 +141,10 @@
           category_id: 0,
           amount: 0,
           vendors: {
+            id: null,
+            name: "",
+          },
+          categories: {
             id: null,
             name: "",
           },
@@ -162,6 +175,7 @@
       async function save() {
         if (
           transaction.value.vendors.name.trim().length === 0 ||
+          transaction.value.categories.name.trim().length === 0 ||
           transaction.value.amount === 0
         ) {
           alert("Validation error");
@@ -192,6 +206,7 @@
         selectDate,
         Currency,
         vendors,
+        categories,
       };
     },
   };
