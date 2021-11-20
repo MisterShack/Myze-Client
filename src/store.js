@@ -80,10 +80,15 @@ export const store = reactive({
       alert(recurringError);
     }
 
+    recurring = {
+      ...recurring,
+      ...recurringInsertData[0],
+    };
+
     // Let's add/update the recurring information in the store to allow the reactive nature take effect
     store.accounts[recurring.account_id].recurring[recurring.id] = recurring;
 
-    return recurringInsertData[0].id;
+    return recurring.id;
   },
   async removeRecurring(recurringId) {
     const { data, error } = supabase
