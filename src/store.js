@@ -104,27 +104,31 @@ export const store = reactive({
   },
   async loadData() {
     if (store.user) {
-      const { data: accounts, error: accountError } = await supabase.from(
-        "accounts"
-      ).select(`
-        *,
-        recurring (
-          *,
-          vendors (
-            id, name
-          )
-        )`);
+      const { data: accounts, error: accountError } = await supabase
+        .from("accounts")
+        .select(`*`)
+        .eq("deleted", false);
 
       accounts.forEach((account) => {
-        const recurringTransactions = {};
-
-        account.recurring.forEach((recurring) => {
-          recurringTransactions[recurring.id] = recurring;
-        });
-
-        account.recurring = recurringTransactions;
-
         store.accounts[account.id] = account;
+      });
+
+      const { data: recurring, error: recurringError } = await supabase
+        .from("recurring")
+        .select(
+          `
+        *,
+        vendors(id, name)
+      `
+        )
+        .eq("deleted", false);
+
+      recurring.forEach((r) => {
+        if (!store.accounts[r.account_id].recurring) {
+          store.accounts[r.account_id].recurring = {};
+        }
+
+        store.accounts[r.account_id].recurring[r.id] = r;
       });
 
       const { data: vendors, error: vendorsError } = await supabase
