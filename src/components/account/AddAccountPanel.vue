@@ -43,6 +43,7 @@
 <script>
   import { reactive } from "vue";
   import { supabase } from "@/supabase";
+  import { accountTypes } from "@/helpers/Constants";
 
   import MyzeButton from "@/components/MyzeButton.vue";
   import FormField from "@/components/forms/inputs/FormField.vue";
@@ -61,16 +62,6 @@
       });
 
       const router = useRouter();
-
-      const accountTypes = {
-        CHEQUING: "Chequing",
-        CREDIT_CARD: "Credit Card",
-        SAVINGS: "Savings",
-        TFSA: "Tax-Free Savings",
-        LOAN: "Loan",
-        LOC: "Line of Credit",
-        RRSP: "Retirement Savings Plan",
-      };
 
       async function addAccount() {
         newAccount.current_balance = newAccount.starting_balance;
