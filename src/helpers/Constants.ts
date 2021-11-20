@@ -20,3 +20,10 @@ export const accountTypes = {
   LOC: "Line of Credit",
   RRSP: "Retirement Savings Plan",
 };
+
+export const recurringTypes = {
+  "1W": "Every week",
+  "2W": "Every two weeks",
+  "1M": "Every month",
+  "1Y": "Every year",
+};
