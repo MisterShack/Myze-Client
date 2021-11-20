@@ -90,15 +90,17 @@ export const store = reactive({
 
     return recurring.id;
   },
-  async removeRecurring(recurringId) {
-    const { data, error } = supabase
+  async removeRecurring(recurring) {
+    const { data, error } = await supabase
       .from("recurring")
       .update({ deleted: true })
-      .eq("id", recurringId);
+      .eq("id", recurring.id);
 
     if (error) {
       alert(error);
     }
+
+    delete store.accounts[recurring.account_id].recurring[recurring.id];
   },
   async loadData() {
     if (store.user) {
