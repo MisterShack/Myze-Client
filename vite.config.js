@@ -5,7 +5,9 @@ import path from "path";
  * @type {import('vite').UserConfig}
  */
 export default {
-  alias: { "@": path.resolve("src") },
+  resolve: {
+    alias: { "@": path.resolve("src") },
+  },
   plugins: [vue()],
   server: {
     port: 8080,

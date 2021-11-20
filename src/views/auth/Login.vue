@@ -1,14 +1,14 @@
 <template>
   <div class="max-w-md w-full space-y-8 m-auto">
-    <form class="mt-8 space-y-6" @submit.prevent="login">
+    <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
       <p class="text-2xl">Login</p>
 
-      <p
+      <!-- <p
         v-if="state.errorMessage.length > 0"
         class="bg-red-200 border border-red-300 text-red-800 px-2 py-2 rounded-md"
       >
         {{ state.errorMessage }}
-      </p>
+      </p> -->
 
       <div class="rounded-md shadow-sm -space-y-px">
         <div>
@@ -19,27 +19,14 @@
             type="email"
             autocomplete="email"
             required
-            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10"
+            class="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900  focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10"
             placeholder="Email address"
-            v-model="state.email"
-          />
-        </div>
-        <div>
-          <label for="password" class="sr-only">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autocomplete="current-password"
-            required
-            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10"
-            placeholder="Password"
-            v-model="state.password"
+            v-model="email"
           />
         </div>
       </div>
 
-      <div class="flex items-center justify-between">
+      <!-- <div class="flex items-center justify-between">
         <div class="flex items-center">
           <input
             id="remember_me"
@@ -57,7 +44,7 @@
             Forgot your password?
           </a>
         </div>
-      </div>
+      </div> -->
 
       <div>
         <button
@@ -97,33 +84,33 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, reactive } from "vue";
-  import { useRouter } from "vue-router";
-  import { realm } from "@/realm";
+  import { defineComponent, ref } from "vue";
+  import { supabase } from "../../supabase";
+
   export default defineComponent({
     setup() {
-      const state = reactive({
-        email: "",
-        password: "",
-        errorMessage: "",
-      });
+      const loading = ref(false);
+      const email = ref("");
 
-      const router = useRouter();
-
-      async function login() {
-        const user = await realm.loginWithEmailAndPassword(
-          state.email,
-          state.password
-        );
-
-        if (user !== null) {
-          router.push("/overview");
+      const handleLogin = async () => {
+        try {
+          loading.value = true;
+          const { error } = await supabase.auth.signIn({
+            email: email.value,
+          });
+          if (error) throw error;
+          alert("Check your email for the login link!");
+        } catch (error) {
+          alert(error.error_description || error.message);
+        } finally {
+          loading.value = false;
         }
-      }
+      };
 
       return {
-        state,
-        login,
+        loading,
+        email,
+        handleLogin,
       };
     },
   });

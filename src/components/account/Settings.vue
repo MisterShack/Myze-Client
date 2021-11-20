@@ -4,12 +4,13 @@
 
 <script>
   import MyzeButton from "../MyzeButton.vue";
-  import { accountStore } from "@/store/account-store.ts";
   import { useRouter } from "vue-router";
+  import { supabase } from "../../supabase";
 
   export default {
     props: {
-      account: {
+      accountId: {
+        type: Number,
         required: true,
       },
     },
@@ -18,7 +19,11 @@
       const router = useRouter();
 
       async function deleteAccount() {
-        await accountStore.deleteAccount(props.account._id);
+        const { data, error } = await supabase
+          .from("accounts")
+          .update({ deleted: true })
+          .eq("id", props.accountId);
+
         router.push(`/accounts`);
       }
 

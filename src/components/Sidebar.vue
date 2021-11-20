@@ -22,7 +22,6 @@
   import { useRoute } from "vue-router";
 
   import {
-    HomeIcon,
     CogIcon,
     LogoutIcon,
     CollectionIcon,
@@ -31,7 +30,6 @@
 
   export default defineComponent({
     components: {
-      HomeIcon,
       CogIcon,
       LogoutIcon,
       CollectionIcon,
@@ -42,11 +40,6 @@
       const currentRoute = computed(() => route.path);
 
       const links = [
-        {
-          text: "Overview",
-          url: "/overview",
-          icon: HomeIcon,
-        },
         {
           text: "Accounts",
           url: "/accounts",

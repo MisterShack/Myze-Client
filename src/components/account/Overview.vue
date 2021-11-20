@@ -1,16 +1,5 @@
 <template>
   <div
-    v-if="Object.keys(notifications).length > 0"
-    class="bg-green-100 text-green-900 shadow-md rounded-lg py-3 px-4 mb-5"
-  >
-    <p class="text-md font-bold">Keep it up!</p>
-    <p class="text-sm">
-      Your cash flow was up $587 in December compared to November. Go even
-      higher this month!
-    </p>
-  </div>
-
-  <div
     class="flex space-y-5 lg:space-y-0 flex-col lg:space-x-5 lg:flex-row lg:justify-between lg:items-baseline mb-10"
   >
     <div
@@ -21,7 +10,7 @@
         <span class="text-xs text-gray-600">(Next four weeks)</span>
       </h2>
       <p
-        v-if="Object.values(state.futureTransactions).length === 0"
+        v-if="Object.values(futureTransactions).length === 0"
         class="text-center pt-5 pb-10 text-yellow-900"
       >
         No upcoming transactions!
@@ -34,14 +23,14 @@
             {{ dayjs(date).format("MMMM DD") }}
           </li>
           <li
-            v-for="(transaction, key) in state.futureTransactions[date]"
+            v-for="(transaction, key) in futureTransactions[date]"
             :key="`${date}_${key}`"
           >
             <ul>
               <li
                 class="py-1 mb-2 flex items-center justify-between text-gray-600"
               >
-                <span>{{ transaction.vendor.name }}</span>
+                <span>{{ transaction.vendors.name }}</span>
                 <span class="text-lg">{{
                   new Currency(
                     transaction.amount /
@@ -66,7 +55,7 @@
         Latest Transactions
       </h2>
       <p
-        v-if="Object.keys(state.account.transactions).length === 0"
+        v-if="Object.keys(latestTransactions).length === 0"
         class="text-center pt-5 pb-10 text-gray-500"
       >
         No transactions to display
@@ -85,10 +74,10 @@
             <ul class="mb-5">
               <li
                 v-for="transaction in transactions"
-                :key="transaction._id.toString()"
+                :key="transaction.id"
                 class="py-1 flex items-center justify-between text-gray-600"
               >
-                <span>{{ transaction.vendor.name }}</span>
+                <span>{{ transaction.vendors.name }}</span>
                 <span class="text-lg">{{
                   new Currency(
                     transaction.amount /
@@ -110,11 +99,12 @@
 </template>
 
 <script>
-  import { computed, reactive, watch } from "vue";
+  import { computed, ref, watch } from "vue";
+  import { supabase } from "@/supabase";
 
   import dayjs from "dayjs";
   import Currency from "@/helpers/Currency";
-  import RecurringService from "@/services/RecurringService.ts";
+  import RecurringService from "@/services/RecurringService.js";
 
   export default {
     props: {
@@ -122,60 +112,63 @@
         type: Object,
         required: true,
       },
-      notifications: {
-        type: Object,
-        default: {},
-      },
     },
     setup(props) {
-      const state = reactive({
-        account: props.account,
-        futureTransactions: RecurringService.generateFutureTransactions(
-          props.account._id.toString(),
+      const account = ref(props.account);
+
+      const futureTransactions = ref(
+        RecurringService.generateFutureTransactions(
+          Object.values(account.value.recurring),
           dayjs()
             .add(4, "week")
             .format("YYYY-MM-DD")
-        ),
-      });
+        )
+      );
+
+      console.log(futureTransactions.value);
 
       const orderedFutureTransactionDates = computed(() =>
-        Object.keys(state.futureTransactions).sort()
+        Object.keys(futureTransactions.value).sort()
       );
 
       watch(
-        () => props.account,
-        (account) => {
-          state.account = account;
-          state.futureTransactions = RecurringService.generateFutureTransactions(
-            props.account._id.toString(),
+        () => account.value.recurring,
+        () => {
+          futureTransactions.value = RecurringService.generateFutureTransactions(
+            Object.values(account.value.recurring),
             dayjs()
-              .add(2, "week")
+              .add(4, "week")
               .format("YYYY-MM-DD")
           );
-        }
+        },
+        { deep: true }
       );
 
-      const latestTransactions = computed(() => {
+      const latestTransactions = computed(async () => {
         let latestTransactions = {};
         let numberOfTransactions = 5;
 
-        let transactions = Object.values(props.account.transactions)
-          .reverse()
-          .slice(0, numberOfTransactions);
+        const { data: transactions, error } = await supabase
+          .from("transactions")
+          .select(`*, vendors(id, name)`)
+          .eq("account_id", account.value.id)
+          .order("date", { ascending: false })
+          .limit(numberOfTransactions);
 
         transactions.forEach((t) => {
           if (!latestTransactions[t.date]) {
             latestTransactions[t.date] = {};
           }
 
-          latestTransactions[t.date][t._id.toString()] = t;
+          latestTransactions[t.date][t.id] = t;
         });
 
         return latestTransactions;
       });
 
       return {
-        state,
+        account,
+        futureTransactions,
         latestTransactions,
         Currency,
         dayjs,

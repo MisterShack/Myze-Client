@@ -10,7 +10,6 @@
   import { defineComponent, reactive } from "vue";
   import PageHeader from "@/components/PageHeader.vue";
   import dayjs from "dayjs";
-  import { realm } from "@/realm";
 
   export default defineComponent({
     components: { PageHeader },

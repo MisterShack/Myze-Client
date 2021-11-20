@@ -3,7 +3,7 @@
     <template #label>Date</template>
     <div class="mt-1 relative rounded-md shadow-sm">
       <DatePicker
-        :selectedDate="state.transaction.date"
+        :selectedDate="transaction.date"
         @select-date="selectDate"
         Required
       ></DatePicker>
@@ -14,7 +14,15 @@
     <template #label>Vendor</template>
     <VendorDropdown
       :vendors="vendors"
-      v-model:selectedVendor="state.transaction.vendor"
+      v-model:selectedVendor="transaction.vendors"
+    />
+  </FormField>
+
+  <FormField>
+    <template #label>Category</template>
+    <VendorDropdown
+      :vendors="categories"
+      v-model:selectedVendor="transaction.categories"
     />
   </FormField>
 
@@ -34,9 +42,9 @@
           type="number"
           step="0.01"
           name="StartingBalance"
-          :value="state.transaction.amount / 100"
+          :value="transaction.amount / 100"
           @input="
-            state.transaction.amount = Currency.createFromString(
+            transaction.amount = Currency.createFromString(
               $event.target.value
             ).amount
           "
@@ -46,8 +54,8 @@
     <FormField class="my-0">
       <template #label>Type</template>
       <SelectMenu
-        :options="state.typeOptions"
-        v-model:selectedKey="state.transaction.type"
+        :options="transactionOptions"
+        v-model:selectedKey="transaction.type"
       />
     </FormField>
   </div>
@@ -57,7 +65,7 @@
     <div class="mt-1 relative rounded-md shadow-sm">
       <textarea
         class="form-input block w-full px-3 py-2"
-        v-model="state.transaction.description"
+        v-model="transaction.description"
       ></textarea>
     </div>
   </FormField>
@@ -65,7 +73,7 @@
   <div class="flex justify-between">
     <MyzeButton theme="Success" icon="Save" @click="save">Save</MyzeButton>
     <MyzeButton
-      v-if="state.transaction._id"
+      v-if="transaction.id"
       theme="Danger"
       icon="Delete"
       @click="remove"
@@ -84,10 +92,16 @@
 </style>
 
 <script>
-  import { reactive } from "vue";
-  import { accountStore } from "@/store/account-store.ts";
-  import Currency from "@/helpers/Currency";
+  // Core
+  import { ref } from "vue";
+  import { store } from "@/store";
+  import { supabase } from "@/supabase";
 
+  // Helpers
+  import Currency from "@/helpers/Currency";
+  import { transactionOptions } from "@/helpers/Constants";
+
+  // Components
   import Collapsible from "@/components/forms/Collapsible.vue";
   import DatePicker from "@/components/forms/inputs/DatePicker.vue";
   import MyzeButton from "@/components/MyzeButton.vue";
@@ -97,15 +111,13 @@
 
   export default {
     props: {
-      account: {
-        type: Object,
+      accountId: {
+        type: Number,
         required: true,
       },
-      vendors: {
+      transactionToEdit: {
         type: Object,
-        required: true,
       },
-      transactionId: String,
     },
     components: {
       Collapsible,
@@ -117,20 +129,22 @@
     },
     emits: ["close"],
     setup(props, { emit }) {
-      const state = reactive({
-        transaction: getDefaultTransaction(),
-        typeOptions: {
-          DEBIT: "Expense",
-          CREDIT: "Income",
-        },
-      });
+      const transaction = ref(getDefaultTransaction());
+      const account = ref(store.accounts[props.accountId]);
+      const vendors = ref(store.vendors);
+      const categories = ref(store.categories);
 
       function getDefaultTransaction() {
         return {
           date: new Date().toISOString().substr(0, 10),
-          account_id: props.account._id,
+          account_id: props.accountId,
+          category_id: 0,
           amount: 0,
-          vendor: {
+          vendors: {
+            id: null,
+            name: "",
+          },
+          categories: {
             id: null,
             name: "",
           },
@@ -139,33 +153,60 @@
         };
       }
 
-      if (props.transactionId) {
-        state.transaction = {
-          ...props.account.transactions[props.transactionId],
+      if (props.transactionToEdit) {
+        transaction.value = {
+          ...props.transactionToEdit,
         };
       }
 
       function selectDate(date) {
-        state.transaction.date = date;
+        transaction.date = date;
       }
 
       async function remove() {
-        // Remove from DB, and local store
-        await accountStore.removeTransaction(state.transaction);
+        const { data, error } = await supabase
+          .from("transactions")
+          .delete()
+          .eq("id", transaction.value.id);
+
         emit("close");
       }
 
       async function save() {
-        await accountStore.saveTransaction(state.transaction);
+        if (
+          transaction.value.vendors.name.trim().length === 0 ||
+          transaction.value.categories.name.trim().length === 0 ||
+          transaction.value.amount === 0
+        ) {
+          alert("Validation error");
+          return false;
+        }
+
+        // Create or Update transaction to store. We need to pass a non-reactive object to prevent Vendor dropdown error
+        await store.upsertTransaction({ ...transaction.value });
+
+        // Let's update the account current balance
+        let { data: current_balance, error } = await supabase.rpc(
+          "update_account_current_balances",
+          {
+            accountid: account.value.id,
+          }
+        );
+
+        store.accounts[account.value.id].current_balance = current_balance;
+
         emit("close");
       }
 
       return {
-        state,
+        transaction,
+        transactionOptions,
         remove,
         save,
         selectDate,
         Currency,
+        vendors,
+        categories,
       };
     },
   };

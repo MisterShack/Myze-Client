@@ -1,16 +1,4 @@
 <template>
-  <div
-    v-if="notifications.length > 0"
-    class="bg-blue-100 text-blue-900 shadow-md rounded-lg py-3 px-4 mb-5"
-  >
-    <p class="text-md font-bold">Recurring Suggestion</p>
-
-    <p class="text-sm">
-      We noticed that you have multiple transactions from David's Tea for
-      $15.99. Click here to make this a recurring transaction.
-    </p>
-  </div>
-
   <div class="bg-white shadow-md rounded-lg p-6">
     <div class="flex justify-between items-center">
       <h2 class="text-lg tracking-wide">Transactions</h2>
@@ -27,6 +15,7 @@
     >
       No transactions to display!
     </p>
+
     <ul v-else class="my-6">
       <template v-for="date in sortedTransactionDates" :key="date">
         <li
@@ -40,10 +29,10 @@
               v-for="transaction in transactionsByDate[date]"
               :key="`Transaction_${transaction.id}`"
               class="py-1 flex items-center justify-between text-gray-600"
-              @click="openTransactionPanel(transaction._id.toString())"
+              @click="openTransactionPanel(transaction)"
             >
               <div>
-                <p>{{ transaction.vendor.name }}</p>
+                <p>{{ transaction.vendors.name }}</p>
                 <p class="text-xs text-gray-400">
                   {{ transaction.description }}
                 </p>
@@ -66,15 +55,14 @@
     </ul>
   </div>
 
-  <Panel v-model:active="state.showTransactionPanel">
+  <Panel v-model:active="showTransactionPanel">
     <template #title
-      >{{ state.transactionToEdit ? "Edit" : "Add" }} Transaction</template
+      >{{ transactionToEdit ? "Edit" : "Add" }} Transaction</template
     >
     <template v-slot="scope">
       <AddTransactionForm
-        :account="account"
-        :vendors="vendors"
-        :transactionId="state.transactionToEdit"
+        :accountId="account.id"
+        :transactionToEdit="transactionToEdit"
         @close="scope.close"
       />
     </template>
@@ -82,62 +70,103 @@
 </template>
 
 <script>
-  import { reactive, computed } from "vue";
+  import { ref, computed, onMounted } from "vue";
   import Currency from "@/helpers/Currency";
   import dayjs from "dayjs";
+  import { supabase } from "@/supabase";
+  import { store } from "@/store";
 
   import Panel from "@/components/Panel.vue";
   import AddTransactionForm from "@/components/account/AddTransactionForm.vue";
 
   export default {
     props: {
-      account: {
+      accountId: {
+        type: Number,
         required: true,
-      },
-      vendors: {
-        type: Object,
-        required: true,
-      },
-      notifications: {
-        type: Array,
-        default: [],
       },
     },
     components: { Panel, AddTransactionForm },
     setup(props) {
-      const state = reactive({
-        transactionToEdit: null,
-        showTransactionPanel: false,
-        transactions: props.account.transactions,
-      });
+      const transactionToEdit = ref({});
 
-      const sortedTransactionDates = computed(() =>
-        Object.keys(transactionsByDate.value).sort(
+      const showTransactionPanel = ref(false);
+
+      const transactions = ref([]);
+
+      const sortedTransactionDates = computed(() => {
+        return Object.keys(transactionsByDate.value).sort(
           (a, b) => new Date(b) - new Date(a)
-        )
-      );
+        );
+      });
 
       const transactionsByDate = computed(() => {
         const transactionsByDate = {};
 
-        Object.values(state.transactions).forEach((t) => {
+        Object.values(transactions.value).forEach((t) => {
           if (!transactionsByDate[t.date]) {
             transactionsByDate[t.date] = {};
           }
 
-          transactionsByDate[t.date][t._id.toString()] = t;
+          transactionsByDate[t.date][t.id] = t;
         });
 
         return transactionsByDate;
       });
 
-      function openTransactionPanel(transactionId) {
-        state.transactionToEdit = transactionId;
-        state.showTransactionPanel = true;
+      function openTransactionPanel(transaction) {
+        // If this transaction cannot be edited, let's display a warning instead.
+        if (
+          transaction &&
+          transaction.hasOwnProperty("canEdit") &&
+          !transaction.canEdit
+        ) {
+          alert("Cannot edit this transaction");
+          return false;
+        }
+
+        transactionToEdit.value = transaction;
+        showTransactionPanel.value = true;
       }
 
+      const account = ref(store.accounts[props.accountId]);
+
+      onMounted(async () => {
+        let { data: t, error } = await supabase
+          .from("transactions")
+          .select(
+            `
+            id,
+            type,
+            amount,
+            account_id,
+            date,
+            description,
+            vendors (id, name),
+            categories(id, name)
+          `
+          )
+          .eq("account_id", props.accountId);
+
+        // Add a fake transaction for the starting balance
+        t.push({
+          type: account.value.starting_balance > 0 ? "CREDIT" : "DEBIT",
+          amount: account.value.starting_balance,
+          date: account.value.created_at.substr(0, 10),
+          canEdit: false,
+          vendors: {
+            name: "Starting Balance",
+          },
+        });
+
+        transactions.value = t;
+      });
+
       return {
-        state,
+        account,
+        transactionToEdit,
+        showTransactionPanel,
+        transactions,
         sortedTransactionDates,
         transactionsByDate,
         openTransactionPanel,
