@@ -6,6 +6,7 @@ export const store = reactive({
   user: {},
   accounts: [],
   vendors: [],
+  categories: [],
   async createVendor(vendorName) {
     const { data, error } = await supabase.from("vendors").insert([
       {
@@ -24,6 +25,24 @@ export const store = reactive({
 
     return newVendor;
   },
+  async createCategory(categoryName) {
+    const { data, error } = await supabase.from("categories").insert([
+      {
+        user_id: store.user.id,
+        name: categoryName,
+      },
+    ]);
+
+    const newCategory = {
+      id: data[0].id,
+      name: categoryName,
+    };
+
+    // Add the new vendor to the store
+    store.categories.push(newCategory);
+
+    return newCategory;
+  },
   async upsertTransaction(transaction) {
     // If this is a new vendor, let's save it
     if (transaction.vendors.id == null) {
@@ -34,9 +53,22 @@ export const store = reactive({
       transaction.vendors.id = newVendor.id;
     }
 
+    if (transaction.categories.id == null) {
+      // Create new Category
+      const newCategory = await store.createCategory(
+        transaction.categories.name
+      );
+
+      // Update the vendor id for the transaction
+      transaction.categories.id = newCategory.id;
+    }
+
     // Let's remove our vendor object and just use the vendor id
     transaction.vendor_id = transaction.vendors.id;
     delete transaction.vendors;
+
+    transaction.category_id = transaction.categories.id;
+    delete transaction.categories;
 
     // Save our transaction data to the DB
     const {
@@ -60,6 +92,18 @@ export const store = reactive({
       recurring.vendors.id = newVendor.id;
     }
 
+    // If this is a new category, let's save it
+    if (recurring.categories.id == null) {
+      // Create new Category
+      const newCategory = await store.createCategory(recurring.categories.name);
+
+      // Update the vendor id for the transaction
+      recurring.categories.id = newCategory.id;
+    }
+
+    // Let's update the category id
+    recurring.category_id = recurring.categories.id;
+
     // Let's update the vendor id
     recurring.vendor_id = recurring.vendors.id;
 
@@ -68,6 +112,7 @@ export const store = reactive({
       ...recurring,
     };
 
+    delete recurringToInsert.categories;
     delete recurringToInsert.vendors;
 
     // Save our transaction data to the DB
@@ -110,6 +155,7 @@ export const store = reactive({
         .eq("deleted", false);
 
       accounts.forEach((account) => {
+        account.recurring = {};
         store.accounts[account.id] = account;
       });
 
@@ -118,16 +164,13 @@ export const store = reactive({
         .select(
           `
         *,
-        vendors(id, name)
+        vendors(id, name),
+        categories(id, name)
       `
         )
         .eq("deleted", false);
 
       recurring.forEach((r) => {
-        if (!store.accounts[r.account_id].recurring) {
-          store.accounts[r.account_id].recurring = {};
-        }
-
         store.accounts[r.account_id].recurring[r.id] = r;
       });
 
@@ -137,10 +180,17 @@ export const store = reactive({
         .eq("user_id", store.user.id);
 
       store.vendors = vendors;
+
+      const { data: categories, error: categoriesError } = await supabase
+        .from("categories")
+        .select("id, name")
+        .eq("user_id", store.user.id);
+      store.categories = categories;
     } else {
       store.accounts = [];
       store.recurring = [];
       store.vendors = [];
+      store.categories = [];
     }
 
     store.loading = false;
