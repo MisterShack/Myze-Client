@@ -48,8 +48,6 @@ export const store = reactive({
       alert(transactionError);
     }
 
-    console.log("Transaction Inserted", transactionInsertData);
-
     return transactionInsertData[0].id;
   },
   async loadData() {
