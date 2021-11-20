@@ -3,8 +3,8 @@
     <FormField class="flex-1 mb-0">
       <template #label>Start Date</template>
       <DatePicker
-        :selectedDate="state.recurring.start_date"
-        @select-date="state.recurring.start_date = $event"
+        :selectedDate="recurring.start_date"
+        @select-date="recurring.start_date = $event"
         required
       ></DatePicker>
     </FormField>
@@ -12,8 +12,8 @@
     <FormField class="flex-1 mb-0">
       <template #label>End Date</template>
       <DatePicker
-        :selectedDate="state.recurring.end_date"
-        @select-date="state.recurring.end_date = $event"
+        :selectedDate="recurring.end_date"
+        @select-date="recurring.end_date = $event"
         anchor="BR"
       ></DatePicker>
     </FormField>
@@ -23,18 +23,18 @@
     <FormField class="flex-1 mb-0">
       <template #label>Interval</template>
       <SelectMenu
-        :options="state.interval_options"
-        :selectedKey="state.recurring.interval"
-        @select="state.recurring.interval = $event"
+        :options="intervalOptions"
+        :selectedKey="recurring.interval"
+        @select="recurring.interval = $event"
       />
     </FormField>
 
     <FormField class="flex-1 mb-0">
       <template #label>Type</template>
       <SelectMenu
-        :options="state.type_options"
-        :selectedKey="state.recurring.type"
-        @select="state.recurring.type = $event"
+        :options="transactionOptions"
+        :selectedKey="recurring.type"
+        @select="recurring.type = $event"
       />
     </FormField>
   </div>
@@ -43,7 +43,7 @@
     <template #label>Vendor</template>
     <VendorDropdown
       :vendors="vendors"
-      v-model:selectedVendor="state.recurring.vendor"
+      v-model:selectedVendor="recurring.vendors"
     />
   </FormField>
 
@@ -61,11 +61,9 @@
       type="number"
       step="0.01"
       name="StartingBalance"
-      :value="state.recurring.amount / 100"
+      :value="recurring.amount / 100"
       @input="
-        state.recurring.amount = Currency.createFromString(
-          $event.target.value
-        ).amount
+        recurring.amount = Currency.createFromString($event.target.value).amount
       "
     />
   </FormField>
@@ -74,12 +72,12 @@
     <template #label>Description</template>
     <textarea
       class="border border-gray-300 rounded-md block w-full px-3 py-2"
-      v-model="state.recurring.description"
+      v-model="recurring.description"
     ></textarea>
   </FormField>
 
   <MyzeButton
-    v-if="state.recurring.id !== null"
+    v-if="recurring.id !== null"
     class="mt-5"
     theme="Danger"
     @click="removeRecurring"
@@ -90,11 +88,16 @@
 </template>
 
 <script>
-  import { reactive } from "vue";
-  import { accountStore } from "@/store/account-store.ts";
-  import Currency from "@/helpers/Currency";
+  // Core
+  import { ref, computed } from "vue";
+  import { store } from "@/store";
   import dayjs from "dayjs";
 
+  // Helpers
+  import Currency from "@/helpers/Currency";
+  import { transactionOptions } from "@/helpers/Constants";
+
+  // Components
   import FormField from "@/components/forms/inputs/FormField.vue";
   import DatePicker from "@/components/forms/inputs/DatePicker.vue";
   import SelectMenu from "@/components/forms/inputs/SelectMenu.vue";
@@ -103,15 +106,11 @@
 
   export default {
     props: {
-      account: {
-        type: Object,
+      accountId: {
+        type: Number,
         required: true,
       },
-      vendors: {
-        type: Object,
-        required: true,
-      },
-      recurringId: String,
+      recurringId: Number,
     },
     components: {
       DatePicker,
@@ -122,25 +121,26 @@
     },
     emits: ["close", "form-saved"],
     setup(props, { emit }) {
-      const state = reactive({
-        recurring: getDefaultRecurring(),
-        interval_options: {
-          "1W": "Every Week",
-          "2W": "Every Two Weeks",
-          "1M": "Every Month",
-          "1Y": "Every Year",
-          Custom: "Custom",
-        },
-        type_options: {
-          DEBIT: "Expense",
-          CREDIT: "Income",
-        },
-      });
+      // Setup our recurring defaults
+      const recurring = ref(getDefaultRecurring());
+
+      // Interval options for recurring transactions
+      const intervalOptions = {
+        "1W": "Every Week",
+        "2W": "Every Two Weeks",
+        "1M": "Every Month",
+        "1Y": "Every Year",
+        Custom: "Custom",
+      };
+
+      const account = computed(() => store.accounts[props.accountId]);
+
+      const vendors = computed(() => store.vendors);
 
       function getDefaultRecurring() {
         return {
-          account_id: props.account._id,
-          vendor: {
+          account_id: props.accountId,
+          vendors: {
             id: null,
             name: "",
           },
@@ -154,26 +154,28 @@
       }
 
       if (props.recurringId) {
-        state.recurring = { ...props.account.recurring[props.recurringId] };
+        recurring.value = { ...account.value.recurring[props.recurringId] };
       }
 
       async function save() {
-        await accountStore.saveRecurring(state.recurring);
+        await store.upsertRecurring({ ...recurring.value });
         emit("form-saved");
         emit("close");
       }
 
       async function removeRecurring() {
-        // Remove from DB, and local store
-        await accountStore.removeRecurring(state.recurring);
+        await store.removeRecurring(recurring.value);
         emit("close");
       }
 
       return {
-        state,
+        recurring,
+        transactionOptions,
+        intervalOptions,
         save,
         removeRecurring,
         Currency,
+        vendors,
       };
     },
   };

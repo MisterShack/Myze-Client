@@ -12,13 +12,13 @@
 <script>
   import { computed } from "vue";
   import Sidebar from "@/components/Sidebar.vue";
-  import { realm } from "@/realm";
+  import { store } from "@/store";
 
   export default {
     components: { Sidebar },
 
     setup() {
-      const user = computed(() => !!realm.currentUser.value);
+      const user = !!store.user?.id;
       return { user };
     },
   };

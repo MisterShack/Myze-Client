@@ -2,18 +2,17 @@
   <div class="flex mb-5 justify-between items-center">
     <PageHeader>Accounts</PageHeader>
     <myze-button
-      v-if="Object.keys(accountStore.state.accountsByType).length > 0"
+      v-if="Object.keys(accountsByType).length > 0"
       theme="Success"
       icon="Add"
-      @click="showAddAccountPanel()"
+      @click="showAddAccountPanel = true"
     >
       Account</myze-button
     >
   </div>
 
-  <p v-if="state.loading">Loading...</p>
   <div
-    v-else-if="Object.keys(accountStore.state.accountsByType).length === 0"
+    v-if="Object.keys(accountsByType).length === 0"
     class="mt-20 text-center text-xl text-gray-600"
   >
     <p class="text-2xl font-bold">No accounts found!</p>
@@ -25,7 +24,7 @@
         class="mx-auto"
         theme="Success"
         icon="Add"
-        @click="showAddAccountPanel()"
+        @click="showAddAccountPanel = true"
       >
         Account</myze-button
       >
@@ -34,7 +33,7 @@
   <template v-else>
     <div
       class="w-full lg:w-2/3 border-b last:border-b-0"
-      v-for="(group, accountType) in accountStore.state.accountsByType"
+      v-for="(group, accountType) in accountsByType"
       :key="accountType"
     >
       <div class="flex items-center justify-between pt-3 text-gray-500">
@@ -57,7 +56,7 @@
         >
           <router-link
             class="flex justify-between py-3 items-center"
-            :to="`/accounts/${account._id.toString()}`"
+            :to="`/accounts/${account.id.toString()}`"
           >
             <span>{{ account.name }}</span>
             {{
@@ -72,40 +71,52 @@
     </div>
   </template>
 
-  <Panel v-model:active="state.showAddAccountPanel">
+  <Panel v-model:active="showAddAccountPanel">
     <template #title>Add Account</template>
     <AddAccountPanel />
   </Panel>
 </template>
 
-<script lang="ts">
-  import { defineComponent } from "vue";
-  import { reactive } from "vue";
-  import PageHeader from "@/components/PageHeader.vue";
-  import MyzeButton from "../components/MyzeButton.vue";
-  import Panel from "@/components/Panel.vue";
-  import AddAccountPanel from "@/components/account/AddAccountPanel.vue";
-  import { accountStore } from "@/store/account-store";
+<script>
+  // Core
+  import { defineComponent, ref, computed } from "vue";
+  import { store } from "@/store";
+
+  // Helpers
+  import { accountTypes } from "@/helpers/Constants";
   import Currency from "@/helpers/Currency";
+
+  // Components
+  import AddAccountPanel from "@/components/account/AddAccountPanel.vue";
+  import MyzeButton from "../components/MyzeButton.vue";
+  import PageHeader from "@/components/PageHeader.vue";
+  import Panel from "@/components/Panel.vue";
 
   export default defineComponent({
     components: { MyzeButton, AddAccountPanel, Panel, PageHeader },
 
     setup() {
-      const state = reactive({
-        loading: true,
-        showAddAccountPanel: false,
+      const showAddAccountPanel = ref(false);
+      const accountsByType = computed(() => {
+        const accountsByType = {};
+
+        store.accounts.forEach((account) => {
+          if (!accountsByType[account.type])
+            accountsByType[account.type] = {
+              label: accountTypes[account.type],
+              balance: 0,
+              accounts: [],
+            };
+
+          accountsByType[account.type].balance += account.current_balance;
+          accountsByType[account.type].accounts.push(account);
+        });
+
+        return accountsByType;
       });
 
-      function showAddAccountPanel() {
-        state.showAddAccountPanel = true;
-      }
-
-      accountStore.loadAccounts().then(() => (state.loading = false));
-
       return {
-        state,
-        accountStore,
+        accountsByType,
         showAddAccountPanel,
         Currency,
       };
