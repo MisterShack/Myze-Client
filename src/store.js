@@ -9,7 +9,7 @@ export const store = reactive({
   async createVendor(vendorName) {
     const { data, error } = await supabase.from("vendors").insert([
       {
-        user_id: supabase.auth.user().id,
+        user_id: store.user.id,
         name: vendorName,
       },
     ]);
