@@ -17,15 +17,12 @@ jobs:
       - name: Installing dependencies
         run: npm install
         
-#       - name: Copy Environment Variables
-#         uses: appleboy/scp-action@master
-#         env: 
-#          HOST: ${{secrets.SSH_HOST}}
-#          KEY: ${{secrets.SSH_KEY}}
-#          USERNAME: ${{secrets.SSH_USER}}
-#         with:
-#           source: "/var/www/myze-client/.env.local"
-#           target: "./.env.local"
+      - name: Create env file
+        run: |
+          touch .env
+          echo VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }} >> .env
+          echo VITE_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} >> .env
+          cat .env
       
       - name: Building project 
         run: npm run build
