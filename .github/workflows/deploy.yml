@@ -25,7 +25,7 @@ jobs:
          USERNAME: ${{secrets.SSH_USER}}
         with:
           source: "/var/www/myze-client/.env.local"
-          target: "./"
+          target: "./.env.local"
       
       - name: Building project 
         run: npm run build
