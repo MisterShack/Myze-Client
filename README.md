@@ -4,7 +4,7 @@
 Myze is simply describe as a self-directed financial tracker. Every piece of data is at the discretion of the user as it does not connect to your banking information for security reasons. 
 
 ## What can Myze do?
-Myze can allow users to do the basics like creating accounts and transactions. Myze also allows you to track your recurring transactions which in turn can provide insights into upcoming transaction and future account balances. 
+Myze allows users to do the basics like creating accounts and transactions. Myze also allows you to track your recurring transactions which in turn can provide insights into upcoming transaction and future account balances. 
 
 ## What is expected of Myze in the future?
 There are a lot of implementations lined up for Myze, but the timeline for these is uncertain, and may not even make the cut. Some of the implementations include but are not limited to:
