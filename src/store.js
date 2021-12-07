@@ -169,6 +169,7 @@ export const store = reactive({
         categories(id, name)
       `
         )
+        .in("account_id", Object.keys(store.accounts))
         .eq("deleted", false);
 
       recurring.forEach((r) => {
