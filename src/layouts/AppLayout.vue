@@ -10,7 +10,6 @@
 </template>
 
 <script>
-  import { computed } from "vue";
   import Sidebar from "@/components/Sidebar.vue";
   import { store } from "@/store";
 

@@ -2,18 +2,15 @@ import { createRouter, createWebHistory } from "vue-router";
 import { supabase } from "@/supabase";
 import { store } from "@/store";
 
-function loadPage(view) {
-  return () => {
-    import(`../views/${view}.vue`);
-  };
-}
-
 const routes = [
   {
     path: "/",
     alias: "/login",
     name: "Login",
     component: () => import("../views/auth/Login.vue"),
+    meta: {
+      layout: "AuthLayout",
+    },
   },
   {
     path: "/logout",
