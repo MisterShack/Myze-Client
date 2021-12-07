@@ -152,6 +152,7 @@ export const store = reactive({
       const { data: accounts, error: accountError } = await supabase
         .from("accounts")
         .select(`*`)
+        .contains("users[]", [store.user.id])
         .eq("deleted", false);
 
       accounts.forEach((account) => {
