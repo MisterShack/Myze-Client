@@ -3,7 +3,7 @@
     <h1 class="text-4xl font-thin">
       Welcome to, <span class="font-normal text-ming  ">Myze</span>
     </h1>
-    <form class="mt-12 space-y-6" @submit.prevent="handleLogin">
+    <form class="mt-12 space-y-6" @submit.prevent="handleSignup">
       <div class="rounded-md shadow-sm -space-y-px">
         <div>
           <label for="email-address" class="sr-only">Email address</label>
@@ -58,11 +58,11 @@
               />
             </svg>
           </span>
-          Login
+          Register
         </button>
         <div class="text-center p-5">
-          <a href="/signup" class=" text-ming text-sm font-medium"
-            >I don't have an account</a
+          <a href="/login" class=" text-ming text-sm font-medium"
+            >I already have an account</a
           >
         </div>
       </div>
@@ -73,7 +73,6 @@
 <script lang="ts">
   import { defineComponent, ref } from "vue";
   import { supabase } from "../../supabase";
-  import { useRouter } from "vue-router";
 
   export default defineComponent({
     setup() {
@@ -81,26 +80,29 @@
       const email = ref("");
       const password = ref("");
 
-      async function handleLogin() {
-        loading.value = true;
-
-        const { error } = await supabase.auth.signIn({
-          email: email.value,
-          password: password.value,
-        });
-
-        if (error) {
+      const handleSignup = async () => {
+        try {
+          loading.value = true;
+          const { error } = await supabase.auth.signUp({
+            email: email.value,
+            password: password.value,
+          });
+          if (error) throw error;
+          alert("Check your email for the login link!");
+          email.value = "";
+          password.value = "";
+        } catch (error) {
           alert(error.error_description || error.message);
+        } finally {
+          loading.value = false;
         }
-
-        loading.value = false;
-      }
+      };
 
       return {
         loading,
         email,
         password,
-        handleLogin,
+        handleSignup,
       };
     },
   });
