@@ -87,7 +87,6 @@ supabase.auth.onAuthStateChange(async (_, session) => {
   if (session) {
     store.user = session.user;
     await store.loadData();
-    router.push("/accounts");
   } else {
     store.user = null;
     await router.push("/login");
