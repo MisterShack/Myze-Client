@@ -70,6 +70,7 @@
 
 <script>
   // Core
+  import { computed, ref } from "vue";
   import { useRoute } from "vue-router";
   import { store } from "@/store";
   import dayjs from "dayjs";
