@@ -43,7 +43,6 @@
 <script>
   // Core
   import { reactive } from "vue";
-  import { supabase } from "@/supabase";
   import { store } from "@/store";
   import { useRouter } from "vue-router";
 
@@ -69,16 +68,7 @@
       const router = useRouter();
 
       async function addAccount() {
-        newAccount.current_balance = newAccount.starting_balance;
-
-        // Create the account using the API and redirect to the account page
-        const { data: accountsInserted, error } = await supabase
-          .from("accounts")
-          .insert([newAccount]);
-
-        const insertedAccount = accountsInserted[0];
-
-        store.accounts[insertedAccount.id] = insertedAccount;
+        const insertedAccount = await store.createAccount(newAccount);
 
         router.push(`/accounts/${insertedAccount.id}`);
       }
