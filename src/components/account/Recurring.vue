@@ -108,7 +108,6 @@
       watch(
         () => account.value.recurring,
         () => {
-          console.log("her");
           annualCashFlow.value = getAnnualCashFlow();
         },
         { deep: true }

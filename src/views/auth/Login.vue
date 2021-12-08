@@ -80,6 +80,7 @@
       const loading = ref(false);
       const email = ref("");
       const password = ref("");
+      const router = useRouter();
 
       async function handleLogin() {
         loading.value = true;
@@ -92,6 +93,8 @@
         if (error) {
           alert(error.error_description || error.message);
         }
+
+        await router.push("/accounts");
 
         loading.value = false;
       }

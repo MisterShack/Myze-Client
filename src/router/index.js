@@ -86,9 +86,7 @@ store.user = supabase.auth.user();
 supabase.auth.onAuthStateChange(async (_, session) => {
   if (session) {
     store.user = session.user;
-    console.log("User loaded");
     await store.loadData();
-    router.push("/accounts");
   } else {
     store.user = null;
     await router.push("/login");
@@ -98,8 +96,6 @@ supabase.auth.onAuthStateChange(async (_, session) => {
 router.beforeEach((to) => {
   const currentUser = store.user;
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
-
-  console.log(to);
 
   if (requiresAuth && !currentUser) {
     return "/login";
