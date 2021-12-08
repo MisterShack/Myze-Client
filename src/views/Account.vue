@@ -1,5 +1,5 @@
 <template>
-  <div v-if="loading">
+  <div v-if="loading || !account">
     <p>Loading...</p>
   </div>
   <template v-else>
@@ -70,7 +70,6 @@
 
 <script>
   // Core
-  import { computed, reactive, ref } from "vue";
   import { useRoute } from "vue-router";
   import { store } from "@/store";
   import dayjs from "dayjs";
