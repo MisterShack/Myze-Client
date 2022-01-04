@@ -160,7 +160,7 @@
       }
 
       function selectDate(date) {
-        transaction.date = date;
+        transaction.value.date = date;
       }
 
       async function remove() {
