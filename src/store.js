@@ -43,6 +43,24 @@ export const store = reactive({
 
     return newCategory;
   },
+  async createAccount(account) {
+    if (!account.hasOwnProperty("current_balance")) {
+      account.current_balance = account.starting_balance;
+    }
+
+    // Create the account using the API and redirect to the account page
+    const { data: accountsInserted, error } = await supabase
+      .from("accounts")
+      .insert([account]);
+
+    const insertedAccount = accountsInserted[0];
+
+    insertedAccount.recurring = {};
+
+    store.accounts[insertedAccount.id] = insertedAccount;
+
+    return insertedAccount;
+  },
   async upsertTransaction(transaction) {
     // If this is a new vendor, let's save it
     if (transaction.vendors.id == null) {
@@ -152,6 +170,7 @@ export const store = reactive({
       const { data: accounts, error: accountError } = await supabase
         .from("accounts")
         .select(`*`)
+        .contains("users[]", [store.user.id])
         .eq("deleted", false);
 
       accounts.forEach((account) => {
@@ -168,6 +187,7 @@ export const store = reactive({
         categories(id, name)
       `
         )
+        .in("account_id", Object.keys(store.accounts))
         .eq("deleted", false);
 
       recurring.forEach((r) => {

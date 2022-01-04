@@ -6,6 +6,7 @@
   import MyzeButton from "../MyzeButton.vue";
   import { useRouter } from "vue-router";
   import { supabase } from "../../supabase";
+  import { store } from "@/store.js";
 
   export default {
     props: {
@@ -23,6 +24,8 @@
           .from("accounts")
           .update({ deleted: true })
           .eq("id", props.accountId);
+
+        delete store.accounts[props.accountId];
 
         router.push(`/accounts`);
       }

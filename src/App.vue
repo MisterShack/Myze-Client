@@ -8,12 +8,11 @@
   import { useRoute } from "vue-router";
   import { computed } from "vue";
 
-
-  import HomeLayout from "@/layouts/HomeLayout.vue";
+  import AuthLayout from "@/layouts/AuthLayout.vue";
   import AppLayout from "@/layouts/AppLayout.vue";
 
   export default {
-    components: { HomeLayout, AppLayout },
+    components: { AuthLayout, AppLayout },
     setup() {
       const route = useRoute();
 

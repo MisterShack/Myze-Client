@@ -99,7 +99,7 @@
 </template>
 
 <script>
-  import { computed, ref, watch } from "vue";
+  import { computed, onMounted, ref, watch } from "vue";
   import { supabase } from "@/supabase";
 
   import dayjs from "dayjs";
@@ -115,6 +115,7 @@
     },
     setup(props) {
       const account = ref(props.account);
+      const latestTransactions = ref({});
 
       const futureTransactions = ref(
         RecurringService.generateFutureTransactions(
@@ -124,8 +125,6 @@
             .format("YYYY-MM-DD")
         )
       );
-
-      console.log(futureTransactions.value);
 
       const orderedFutureTransactionDates = computed(() =>
         Object.keys(futureTransactions.value).sort()
@@ -144,9 +143,12 @@
         { deep: true }
       );
 
-      const latestTransactions = computed(async () => {
+      onMounted(async () => {
+        latestTransactions.value = await getLatestTransactions(5);
+      });
+
+      async function getLatestTransactions(numberOfTransactions) {
         let latestTransactions = {};
-        let numberOfTransactions = 5;
 
         const { data: transactions, error } = await supabase
           .from("transactions")
@@ -164,7 +166,7 @@
         });
 
         return latestTransactions;
-      });
+      }
 
       return {
         account,

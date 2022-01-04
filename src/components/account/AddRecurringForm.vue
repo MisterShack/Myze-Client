@@ -84,15 +84,15 @@
     ></textarea>
   </FormField>
 
-  <MyzeButton
-    v-if="recurring.id !== null"
-    class="mt-5"
-    theme="Danger"
-    @click="removeRecurring"
-    >Delete</MyzeButton
-  >
-
-  <MyzeButton theme="Success" @click="save">Save</MyzeButton>
+  <div class="flex justify-between items-center">
+    <MyzeButton theme="Success" @click="save">Save</MyzeButton>
+    <MyzeButton
+      v-if="recurring.id !== null"
+      theme="Danger"
+      @click="removeRecurring"
+      >Delete</MyzeButton
+    >
+  </div>
 </template>
 
 <script>

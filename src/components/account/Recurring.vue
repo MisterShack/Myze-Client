@@ -1,5 +1,6 @@
 <template>
   <div
+    v-show="annualCashFlow !== 0"
     class=" shadow-md rounded-lg py-3 px-4 mb-5"
     :class="
       annualCashFlow > 0
@@ -107,7 +108,6 @@
       watch(
         () => account.value.recurring,
         () => {
-          console.log("her");
           annualCashFlow.value = getAnnualCashFlow();
         },
         { deep: true }

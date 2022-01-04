@@ -1,12 +1,11 @@
-import { createRouter, createWebHistory } from "vue-router";
+import {
+  createRouter,
+  createWebHistory,
+  NavigationFailureType,
+  isNavigationFailure,
+} from "vue-router";
 import { supabase } from "@/supabase";
 import { store } from "@/store";
-
-function loadPage(view) {
-  return () => {
-    import(`../views/${view}.vue`);
-  };
-}
 
 const routes = [
   {
@@ -14,6 +13,18 @@ const routes = [
     alias: "/login",
     name: "Login",
     component: () => import("../views/auth/Login.vue"),
+    meta: {
+      layout: "AuthLayout",
+    },
+  },
+  {
+    path: "/",
+    alias: "/signup",
+    name: "Signup",
+    component: () => import("../views/auth/Signup.vue"),
+    meta: {
+      layout: "AuthLayout",
+    },
   },
   {
     path: "/logout",
@@ -73,8 +84,13 @@ const router = createRouter({
 store.user = supabase.auth.user();
 
 supabase.auth.onAuthStateChange(async (_, session) => {
-  store.user = session.user;
-  await store.loadData();
+  if (session) {
+    store.user = session.user;
+    await store.loadData();
+  } else {
+    store.user = null;
+    await router.push("/login");
+  }
 });
 
 router.beforeEach((to) => {
