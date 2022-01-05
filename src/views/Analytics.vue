@@ -2,6 +2,28 @@
   <PageHeader class="inline-block pb-5">
     Analytics
   </PageHeader>
+  <div class="mb-5">
+    <ul
+      class="border shadow-sm inline-block"
+      v-if="Object.keys(accounts).length > 0"
+    >
+      <li
+        v-for="(account, id) in accounts"
+        :key="id"
+        class="cursor-pointer rounded border-b p-3 flex items-center"
+        @click="toggleCheckbox(id)"
+      >
+        <div class="border border-blue-400 h-5 w-5 relative bg-blue-100">
+          <CheckIcon
+            style="top: -1px; left: -1px;"
+            class="absolute text-blue-900"
+            v-if="selectedAccountIds.indexOf(id) >= 0"
+          />
+        </div>
+        <span class="ml-2">{{ account.name }}</span>
+      </li>
+    </ul>
+  </div>
   <div class="flex items-center space-x-5">
     <div class="relative border border-1 border-gray-200 px-3 py-2">
       <label class="font-medium">Start Date</label>
