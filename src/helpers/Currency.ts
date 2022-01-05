@@ -5,7 +5,7 @@ export default class Currency {
     this.amount = amount;
   }
 
-  static createFromString(amountString: string) {
+  static createFromString(amountString: string): Currency {
     let [dollars, cents] = amountString.split(".");
 
     let amount: number = (parseInt(dollars) || 0) * 100;
@@ -21,7 +21,7 @@ export default class Currency {
     return new Currency(amount);
   }
 
-  format() {
+  format(): string {
     return new Intl.NumberFormat("en-CA", {
       style: "currency",
       currency: "CAD",
