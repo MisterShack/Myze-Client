@@ -4,7 +4,7 @@ import { supabase } from "./supabase";
 export const store = reactive({
   loading: true,
   user: {},
-  accounts: [],
+  accounts: {},
   vendors: [],
   categories: [],
   async createVendor(vendorName) {
