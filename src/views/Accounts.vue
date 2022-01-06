@@ -100,7 +100,7 @@
       const accountsByType = computed(() => {
         const accountsByType = {};
 
-        store.accounts.forEach((account) => {
+        Object.values(store.accounts).forEach((account) => {
           if (!accountsByType[account.type])
             accountsByType[account.type] = {
               label: accountTypes[account.type],
